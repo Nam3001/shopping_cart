@@ -7,3 +7,12 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# user = User.create!(username: 'Nam3001', password: '123456', address: 'hue', email_address: 'nam@gmail.com', fullname: 'Nguyen Van Nam', role: 0)
+# unit = Unit.create!(unit_name: 'kg', unit_description: 'kilogram')
+# prod = Product.create!(product_name: 'Gao', thumbnail: 'https://example.com/thumbnail.jpg', quantity: 100, price: 20000, unit: unit)
+user = User.find(1)
+prod = Product.find(1)
+od = Order.create!(status: 0, user: user)
+OrderItem.create!(order: od, product: prod, quantity: 2, price: 20000, promotion: 0)
+CartItem.create!(user: user, product: prod, quantity: 2)
