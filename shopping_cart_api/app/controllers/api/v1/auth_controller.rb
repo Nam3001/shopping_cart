@@ -1,5 +1,6 @@
 class Api::V1::AuthController < ApplicationController
   skip_before_action :authenticate, only: [:login, :refresh]
+  
   def login
     user = User.find_by(username: params[:username])
     
@@ -11,7 +12,7 @@ class Api::V1::AuthController < ApplicationController
 
       expire_at = JsonWebToken::ACCESS_TOKEN_EXPIRE.from_now.to_i
 
-      render json: { access_token:, refresh_token:, expire_at: }, status: :ok
+      render json: { access_token: access_token, refresh_token: access_token, expire_at: expire_at }, status: :ok
 
     else
       render json: { error: 'Invalid email or password' }, status: :unauthorized
