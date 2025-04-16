@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_15_052542) do
     t.datetime "updated_at", null: false
     t.index ["product_id"], name: "fk_rails_681a180e84"
     t.index ["user_id"], name: "fk_rails_fcb2cbf0bc"
+    t.check_constraint "`quantity` > 0", name: "check_cart_items_quantity_positive"
   end
 
   create_table "order_items", primary_key: "[:order_id, :product_id]", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -31,6 +32,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_15_052542) do
     t.datetime "updated_at", null: false
     t.index ["order_id"], name: "fk_rails_e3cb28f071"
     t.index ["product_id"], name: "fk_rails_f1a29ddd47"
+    t.check_constraint "(`promotion` >= 0) and (`promotion` <= 100)", name: "check_order_items_promotion_valid"
+    t.check_constraint "`price` >= 0", name: "check_order_items_price_positive"
+    t.check_constraint "`quantity` > 0", name: "check_order_items_quantity_positive"
   end
 
   create_table "orders", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -50,6 +54,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_15_052542) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["unit_id"], name: "index_products_on_unit_id"
+    t.check_constraint "`price` >= 0", name: "check_products_price_positive"
+    t.check_constraint "`quantity` >= 0", name: "check_products_quantity_positive"
   end
 
   create_table "units", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
