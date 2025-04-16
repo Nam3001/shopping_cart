@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_15_052542) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_16_045114) do
   create_table "cart_items", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "product_id", null: false
@@ -56,6 +56,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_15_052542) do
     t.index ["unit_id"], name: "index_products_on_unit_id"
     t.check_constraint "`price` >= 0", name: "check_products_price_positive"
     t.check_constraint "`quantity` >= 0", name: "check_products_quantity_positive"
+  end
+
+  create_table "token_black_lists", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "jti"
+    t.datetime "exp"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_token_black_lists_on_jti"
   end
 
   create_table "units", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

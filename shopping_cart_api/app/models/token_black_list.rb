@@ -1,0 +1,2 @@
+class TokenBlackList < ApplicationRecord
+end
