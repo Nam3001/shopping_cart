@@ -2,9 +2,26 @@ class Product < ApplicationRecord
     has_many :cart_items 
     has_many :users
     belongs_to :unit
+    has_one_attached :thumbnail
     
     validates :product_name, presence: true
     validates :price, presence: true, comparison: { greater_than_or_equal_to: 0 }
     validates :thumbnail, presence: true
     validates :quantity, presence: true, comparison: { greater_than_or_equal_to: 0 }
+
+    validate :acceptable_thumbnail
+
+    private
+    def acceptable_thumbnail
+        return unless thumbnail.attached?
+
+        if thumbnail.byte_size > 1.megabyte
+            errors.add(:thumbnail, "is too big (max 1MB)")
+        end
+
+        acceptable_type = ["image/jpeg", "image/png"]
+        unless acceptable_type.include? thumbnail.content_type
+            errors.add(:thumbnail, "image must be JPG or PNG")
+        end
+    end
 end

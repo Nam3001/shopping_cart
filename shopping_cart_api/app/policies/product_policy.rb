@@ -32,6 +32,6 @@ class ProductPolicy
   end
 
   def show?
-    user.admin?
+    true
   end
 end

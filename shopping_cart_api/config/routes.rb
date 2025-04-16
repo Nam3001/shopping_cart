@@ -11,8 +11,7 @@ Rails.application.routes.draw do
       delete "auth/logout", to: "auth#logout"
       post "auth/refresh", to: "auth#refresh"
 
-      get "products/:id", to: "products#show"
-      get "products", to: "products#index"
+      resources :products, except: %i[new edit]
     end
   end
 
