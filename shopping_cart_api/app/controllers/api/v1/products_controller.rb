@@ -3,10 +3,19 @@ class Api::V1::ProductsController < ApplicationController
 
   before_action :set_product, only: [:show, :update, :destroy]
 
-  def index 
-    products = Product.all.with_attached_thumbnail
+  def index
+    page = params[:page]
+    per_page = params[:per_page] || 10
+    products = Product.with_attached_thumbnail.page(page).per(per_page)
     authorize products
-    render json: products.map { |p| product_json p}, status: :ok
+    render json: {
+      data: products.map { |p| product_json p},
+      pagination: {
+        current_page: products.current_page,
+        total_page: products.total_pages,
+        total_count: products.total_count
+      }
+    }, status: :ok
   end
 
   def show
