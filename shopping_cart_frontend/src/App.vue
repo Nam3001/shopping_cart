@@ -23,4 +23,8 @@ export default {
   --submit-btn-color: #1570ef;
   --submit-btn-hover-color: #3485f8;
 }
+body {
+  margin: 0;
+  padding: 0;
+}
 </style>
