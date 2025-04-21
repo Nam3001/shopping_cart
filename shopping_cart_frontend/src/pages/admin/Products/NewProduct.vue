@@ -1,89 +1,100 @@
 <template>
-  <AdminLayout>
+  <div>
     <div style="padding: 10px 50px;">
       <h1 style="margin: 10px; text-align: center;">Create new Product</h1>
-    <form @submit.prevent="handleSubmit">
-      <label for="productName">Product Name:</label>
-      <BaseInput v-model="productName" id="productName" required />
+      <form @submit.prevent="handleSubmit">
+        <label for="productName">Product Name:</label>
+        <BaseInput v-model="productName" id="productName" required />
 
-      <label for="price">Price:</label>
-      <BaseInput type="number" v-model="price" id="price" required />
+        <label for="price">Price:</label>
+        <BaseInput type="number" v-model="price" id="price" required />
 
-      <label for="quantity">Quantity:</label>
-      <BaseInput type="number" v-model="quantity" id="quantity" required />
+        <label for="quantity">Quantity:</label>
+        <BaseInput type="number" v-model="quantity" id="quantity" required />
 
 
-      <label for="thumbnailUrl">Thumbnail:</label>
-       <input  style="width: 100%; margin-top: 8px;" type="file" id="thumbnailUrl" accept="image/*" @change="handleFileUpload" required />
-       <br />
+        <label for="thumbnailUrl">Thumbnail:</label>
+        <input style="width: 100%; margin-top: 8px;" type="file" id="thumbnailUrl" accept="image/*"
+          @change="handleFileUpload" required />
+        <br />
 
-      <!-- <label for="unit">Unit:</label> -->
-      <!-- <BaseInput v-model="productName" id="unit" /> -->
-       <!-- <select id="unit">
+        <div v-if="thumbnail">
+          <p style="margin-top: 10px;">Preview thumbnail:</p>
+          <img :src="thumbnail_url" alt="Preview" style="height: 100px; margin: 10px 0;" />
+        </div>
+
+        <!-- <label for="unit">Unit:</label> -->
+        <!-- <BaseInput v-model="productName" id="unit" /> -->
+        <!-- <select id="unit">
         <option disabled value="">-- Choose unit --</option>
         <option value="kg" >KG</option>
         <option value="g">G</option>
        </select> -->
-      
-      <input id="submit" type="submit" value="Create new" />
-    </form>
+
+        <input id="submit" type="submit" value="Create new" />
+      </form>
     </div>
 
-  </AdminLayout>
+  </div>
 </template>
 
 <script>
-  import BaseInput from '@/components/BaseInput.vue';
-  import AdminLayout from '@/layouts/AdminLayout.vue';
+import BaseInput from '@/components/BaseInput.vue';
 import api from '@/services/api';
-  export default {
-    data() {
-      return {
-        productName: '',
-        price: '0',
-        quantity: '0',
-        thumbnail: '',
-        unit: '',
+// import PATHS from '@/services/paths';
+export default {
+  data() {
+    return {
+      productName: '',
+      price: 0,
+      quantity: 0,
+      thumbnail: '',
+      thumbnail_url: '',
+    }
+  },
+  components: {
+    BaseInput
+  },
+  methods: {
+    handleSubmit: async function () {
+      const data = new FormData();
+      data.append('product_name', this.productName);
+      data.append('price', this.price);
+      data.append('quantity', this.quantity);
+      data.append('thumbnail', this.thumbnail);
+      data.append('unit_id', 1); // Assuming unit is a number, you can change it to the appropriate value
+
+      try {
+        await api.post('/products', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
+
+        alert('Product created successfully');
+        this.$router.replace({ name: 'admin-products' });
+      } catch (error) {
+        alert('Error creating product:' + error);
       }
     },
-    components: {
-      AdminLayout,
-      BaseInput
-    },
-    methods: {
-      handleSubmit: async function () {
-        const data = new FormData();
-        data.append('product_name', this.productName);
-        data.append('price', this.price);
-        data.append('quantity', this.quantity);
-        data.append('thumbnail', this.thumbnail);
-        data.append('unit_id', 1); // Assuming unit is a number, you can change it to the appropriate value
+    handleFileUpload(e) {
+      const file = e.target.files[0]
+      this.thumbnail = file
 
-        console.log(data.get('product_name'), data.get('price'), data.get('quantity'), data.get('thumbnail'), data.get('unit_id'));
-        try {
-          await api.post('/products', data, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: `Bearer ${localStorage.getItem('access_token')}`
-            }
-          })
-
-          alert('Product created successfully');
-          this.$router.replace({ name: 'admin-products' });
-        } catch (error) {
-          console.error('Error creating product:', error);
-        }
-      },
-      handleFileUpload(e) {
-        this.thumbnail = e.target.files[0]
-        console.log(this.thumbnail);
+      if (file && file.type.startsWith('image/')) {
+        this.thumbnail_url = URL.createObjectURL(file);
+      } else {
+        this.thumbnail_url = '';
       }
     }
   }
+}
 </script>
 <style scoped>
 #submit {
-  background-color: #007204; /* Green */
+  background-color: #007204;
+  /* Green */
   border: none;
   color: white;
   padding: 10px 10px;
@@ -98,7 +109,8 @@ import api from '@/services/api';
 }
 
 #submit:hover {
-  background-color: #005f03; /* Darker green */
+  background-color: #005f03;
+  /* Darker green */
 }
 
 /* Style cho thẻ select */
@@ -118,5 +130,4 @@ option {
   color: #333;
   background-color: #fff;
 }
-
 </style>

@@ -17,6 +17,7 @@
 <script>
   import Sidebar from '@/components/Sidebar.vue'
   import UserInfo from '@/components/UserInfo.vue'
+  import PATHS from '@/services/paths'
   export default {
     name: 'AdminLayout',
     components: {
@@ -33,7 +34,7 @@
     props: {
       logoutPath: {
         type: String,
-        default: '/auth/logout'
+        default: PATHS.logout
       }
     }
   }
@@ -65,7 +66,6 @@ body {
 
 .main .main-content {
   flex-grow: 1;
-  /* padding: 20px; */
 }
 .main-content .header {
   display: flex;

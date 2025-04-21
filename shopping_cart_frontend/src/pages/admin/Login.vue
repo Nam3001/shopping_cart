@@ -20,6 +20,7 @@
 import LoginLogout from '@/layouts/LoginLogout.vue'
 
 import api from '@/services/api.js'
+import PATHS from '@/services/paths';
 
 import { object, string } from 'yup';
 
@@ -41,7 +42,7 @@ export default {
       loginSchema.validate(this.loginData, { abortEarly: false }).then(async() => {
       this.loading = true;
 
-      api.post('/auth/login',{
+      api.post(PATHS.login,{
         username: this.loginData.username, password: this.loginData.password
       }).then(response => {
         localStorage.setItem('access_token', response.data.access_token);

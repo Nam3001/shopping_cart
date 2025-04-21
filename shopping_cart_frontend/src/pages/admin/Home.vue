@@ -1,5 +1,7 @@
 <template>
-  <AdminLayout logout-path="/auth/logout"></AdminLayout>
+  <AdminLayout>
+    <router-view />
+  </AdminLayout>
 </template>
 <script>
 import AdminLayout from '@/layouts/AdminLayout.vue';

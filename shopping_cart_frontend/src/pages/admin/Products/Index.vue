@@ -1,10 +1,11 @@
 <template>
-  <AdminLayout>
+  <div class="content-container">
     <h1 style="margin: 10px 0; text-align: center;">Products list</h1>
     <div style="display: flex; justify-content: flex-end;">
       <Button class-name="create-product-btn" @click="handleNewProduct">Create new product</Button>
     </div>
-    <table>
+    <div class="product-list">
+      <table>
       <thead>
         <tr>
           <th>ID</th>
@@ -34,14 +35,15 @@
         </tr>
       </tbody>
     </table>
+    </div>
     <vue-paginate :page-count="totalPages" :click-handler="handlePagechange" :prev-text="'Prev'" :next-text="'Next'"
       :container-class="'pagination'" :page-class="'page-item'" :active-class="'active'" v-model="currentPage">
     </vue-paginate>
-  </AdminLayout>
+  </div>
 </template>
 <script>
-import AdminLayout from '@/layouts/AdminLayout.vue';
 import api from '@/services/api.js';
+import PATHS from '@/services/paths';
 import Button from '@/components/Button.vue';
 import Vue from 'vue';
 
@@ -51,7 +53,6 @@ Vue.component('vue-paginate', VuejsPaginate)
 export default {
   name: 'AdminProductsPage',
   components: {
-    AdminLayout,
     Button
   },
   data() {
@@ -59,8 +60,8 @@ export default {
       products: [],
       thumbnailPlaceholder: 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png',
       currentPage: this.$route.query.page ? Number.parseInt(this.$route.query.page) : 1,
-      perPage: 1,
-      totalPages: 2
+      perPage: 10,
+      totalPages: 0
     }
   },
   mounted() {
@@ -77,11 +78,7 @@ export default {
   methods: {
     handleDeleteProduct(productId) {
       if (confirm('Are you sure you want to delete this product?')) {
-        api.delete(`/products/${productId}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('access_token')}`
-            }
-          })
+        api.delete(PATHS.deleteProduct(productId))
           .then(() => {
             alert('Product deleted successfully');
             this.fetchProducts();
@@ -91,8 +88,8 @@ export default {
           });
       }
     },
-    fetchProducts(page = 1, perPage = 1) {
-      api.get('/products', {
+    fetchProducts(page = 1, perPage = 10) {
+      api.get(PATHS.products, {
           params: {
             page: page,
             per_page: perPage
@@ -123,13 +120,22 @@ export default {
 </script>
 
 <style scoped>
+.content-container {
+  padding: 0 20px 20px;
+}
+
+.product-list {
+  max-height: calc(100vh - var(--navbar-height) - 200px);
+  overflow-y: scroll;
+}
+
 .thumbnail-column {
   text-align: center;
   width: 60px;
 }
 
 .thumbnail {
-  width: 100%;
+  width: 70%;
 }
 
 table {
@@ -166,7 +172,8 @@ td {
   color: white;
   padding: 10px;
   margin-bottom: 20px;
-  margin-top: 10px;
+  margin-left: 0;
+  margin-right: 0;
 }
 .create-product-btn:hover {
   background-color: #016001;

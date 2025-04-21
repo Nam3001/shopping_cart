@@ -12,7 +12,9 @@
   </div>
 </template>
 <script>
-import api from '@/services/api.js'
+// import api from '@/services/api.js'
+import logoutUser from '@/utils/logoutUser';
+
   export default {
     props: {
       logoutPath: String
@@ -23,20 +25,9 @@ import api from '@/services/api.js'
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
       },
       handleLogout() {
-        api.delete(this.logoutPath, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`
-          }
+        logoutUser(this.logoutPath).then(() => {
+          this.$router.replace({ name: 'login' });
         })
-          .then(() => {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            this.$router.replace('/admin/login');
-          })
-          .catch((error) => {
-            console.log(error)
-            // alert('Logout failed:', error);
-          });
       }
     }
   }

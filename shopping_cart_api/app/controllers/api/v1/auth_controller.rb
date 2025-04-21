@@ -13,7 +13,7 @@ class Api::V1::AuthController < ApplicationController
       expire_at = JsonWebToken::ACCESS_TOKEN_EXPIRE.from_now.to_i
 
       # không cần trả về expire_at cho client
-      render json: { access_token: access_token, refresh_token: access_token, expire_at: expire_at }, status: :ok
+      render json: { access_token: access_token, refresh_token: refresh_token, expire_at: expire_at }, status: :ok
 
     else
       render json: { error: 'Invalid email or password' }, status: :unauthorized
@@ -22,6 +22,7 @@ class Api::V1::AuthController < ApplicationController
 
   def refresh 
     refresh_token = params[:refresh_token]
+    # byebug
     payload = JsonWebToken.decode(refresh_token)
 
     new_access_token = JsonWebToken.encode_access_token({ user_id: payload[:user_id]})
@@ -36,6 +37,7 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def logout 
+    # xử lý thêm trường hợp nếu token expired thì như nào...
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
 
@@ -51,4 +53,6 @@ class Api::V1::AuthController < ApplicationController
   rescue JWT::DecodeError, JWT::ExpiredSignature, JWT::VerificationError => e
     render json: { error: e.message }, status: :unauthorized
   end
+
+  # viết thêm action /me để check login ở client
 end

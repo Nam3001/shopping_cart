@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 
 import Login from '@/pages/admin/Login.vue'
 import NotFound from '@/pages/NotFound.vue'
-import { default as AdminHome } from '@/pages/admin/Home.vue'
+
 
 Vue.use(VueRouter)
 
@@ -15,39 +15,42 @@ const routes = [
   },
   {
     path: '/admin',
-    component: AdminHome,
-    children: [],
+    name: 'admin-home',
+    component: () => import('@/pages/admin/Home.vue'),
+    children: [
+      {
+        name: 'admin-products',
+        path: 'products',
+        component: () => import('@/pages/admin/Products/Index.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-product-create',
+        path: 'products/new',
+        component: () => import('@/pages/admin/Products/NewProduct.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-product-edit',
+        path: 'products/:id/edit',
+        component: () => import('@/pages/admin/Products/EditProduct.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+    ],
     meta: {
       requiresAuth: true
     }
   },
   {
     path: '/admin/login',
+    name: 'login',
     component: Login,
-  },
-  {
-    path: '/admin/products',
-    name: 'admin-products',
-    component: () => import('@/pages/admin/Products/Index.vue'),
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    name: 'admin-product-create',
-    path: '/admin/products/new',
-    component: () => import('@/pages/admin/Products/NewProduct.vue'),
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    name: 'admin-product-edit',
-    path: '/admin/products/:id/edit',
-    component: () => import('@/pages/admin/Products/EditProduct.vue'),
-    meta: {
-      requiresAuth: true
-    }
   },
   {
     path: '*',
