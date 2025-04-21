@@ -12,6 +12,7 @@ class Api::V1::AuthController < ApplicationController
 
       expire_at = JsonWebToken::ACCESS_TOKEN_EXPIRE.from_now.to_i
 
+      # không cần trả về expire_at cho client
       render json: { access_token: access_token, refresh_token: access_token, expire_at: expire_at }, status: :ok
 
     else
@@ -37,6 +38,7 @@ class Api::V1::AuthController < ApplicationController
   def logout 
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
+
     
     decoded_token = JsonWebToken.decode(token)
 

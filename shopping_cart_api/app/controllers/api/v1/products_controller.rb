@@ -12,7 +12,7 @@ class Api::V1::ProductsController < ApplicationController
       data: products.map { |p| product_json p},
       pagination: {
         current_page: products.current_page,
-        total_page: products.total_pages,
+        total_pages: products.total_pages,
         total_count: products.total_count
       }
     }, status: :ok
