@@ -18,20 +18,19 @@ module Authentication
     token = authorize_header.split(' ').last if authorize_header
     decoded_token = JsonWebToken.decode(token)
 
-    # phải check thêm thử xem là token đó đã expired hay chưa
-
-    if(JsonWebToken.blacklisted? decoded_token[:jti])
+    # check user đó có tồn tại trong hệ thống không
+    @current_user = User.find(decoded_token[:user_id])
+    if @current_user.nil?
+      render json: { error: 'User is not exist' }, status: :unauthorized
+      return
+    elsif JsonWebToken.blacklisted? decoded_token[:jti]
       render json: { error: 'Token has been revoked' }, status: :unauthorized
       return
     end
-
-    Rails.logger.debug "authenticate"
-    @current_user = User.find(decoded_token[:user_id])
   end
 
 
   def invalid_token(e)
-    # Rails.logger.debug(e.message)
     render json: { error: 'Invalid token' }, status: :unauthorized
   end
 

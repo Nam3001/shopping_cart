@@ -13,6 +13,7 @@ const PATHS = {
   deleteProduct(id) {
     return `/products/${id}`
   },
+  me: '/auth/me',
 }
 
 export default PATHS

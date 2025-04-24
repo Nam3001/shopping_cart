@@ -1,3 +1,4 @@
+import { handleExpiredRefreshToken } from "@/utils/common";
 import PATHS from "./paths";
 
 export function handleRequestInterceptor(api) {
@@ -26,7 +27,7 @@ export function handleResponseInterceptor(api) {
         if (response.status === 200) {
           const { access_token } = response.data;
           localStorage.setItem('access_token', access_token);
-
+          
           return api(error.config);
         } else {
           return Promise.reject(error);
@@ -40,7 +41,3 @@ export function handleResponseInterceptor(api) {
   })
 }
 
-function handleExpiredRefreshToken() {
-  alert('Login session was expired, please login again');
-  window.location.assign(PATHS.login)
-}
