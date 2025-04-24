@@ -1,5 +1,7 @@
+
+
 class Api::V1::AuthController < ApplicationController
-  skip_before_action :authenticate, only: [:login, :refresh]
+  skip_before_action :authenticate, only: [:login, :refresh, :logout]
   
   def login
     user = User.find_by(username: params[:username])
@@ -9,8 +11,6 @@ class Api::V1::AuthController < ApplicationController
 
       access_token = JsonWebToken.encode_access_token(payload)
       refresh_token = JsonWebToken.encode_refresh_token(payload)
-
-      expire_at = JsonWebToken::ACCESS_TOKEN_EXPIRE.from_now.to_i
 
       render json: { access_token: access_token, refresh_token: refresh_token }, status: :ok
 
@@ -35,6 +35,8 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def logout 
+    authenticate  # không check ở callback nữa, vì nếu bị lỗi thì nó sẽ rescue ở callback luôn mà không vào logout
+
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
 
