@@ -7,10 +7,10 @@ class User < ApplicationRecord
 
     enum :role, { admin: 0, user: 1 }
 
-    validates :username, presence: true, length: { minimum: 6 }
+    validates :username, presence: true, length: { minimum: 6 }, uniqueness: { case_sensitive: true }
     validates :password, presence: true, length: { minimum: 6 }
     validates :address, presence: true
-    validates :email_address, presence: true, uniqueness: { case_sensitive: true }, format: URI::MailTo::EMAIL_REGEXP
+    validates :email_address, presence: true, uniqueness: { case_sensitive: false }, format: URI::MailTo::EMAIL_REGEXP
     validates :fullname, presence: true
     validates :role, presence: true, inclusion: { in: roles.keys }
 

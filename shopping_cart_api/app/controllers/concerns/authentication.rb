@@ -13,12 +13,16 @@ module Authentication
   private
 
   def authenticate
-
+    
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
     decoded_token = JsonWebToken.decode(token)
 
-    # check user đó có tồn tại trong hệ thống không
+    if decoded_token[:type].eql? 'refresh'
+      render json: { error: 'Cannot authenticate using refresh token' }, status: :unauthorized
+    end
+
+    # checking user either exist or not
     @current_user = User.find(decoded_token[:user_id])
     if @current_user.nil?
       render json: { error: 'User is not exist' }, status: :unauthorized
@@ -27,6 +31,9 @@ module Authentication
       render json: { error: 'Token has been revoked' }, status: :unauthorized
       return
     end
+
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'User is not exist' }, status: :unauthorized
   end
 
 

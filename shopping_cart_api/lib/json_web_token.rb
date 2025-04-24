@@ -7,14 +7,14 @@ class JsonWebToken
   def self.encode_access_token(payload, exp = ACCESS_TOKEN_EXPIRE.from_now.to_i)
     payload[:exp] = exp
     payload[:jti] = SecureRandom.uuid
-
-    # thêm field type = "access/refresh" để ngăn người dùng sử dụng refresh token như access token
+    payload[:type] = 'access'
     JWT.encode(payload, SECRET_KEY, ALGORITHM)
   end
 
   def self.encode_refresh_token(payload, exp = REFRESH_TOKEN_EXPIRE.from_now.to_i)
     payload[:exp] = exp
     payload[:jti] = SecureRandom.uuid
+    payload[:type] = 'refresh'
     JWT.encode(payload, SECRET_KEY, ALGORITHM)
   end
 

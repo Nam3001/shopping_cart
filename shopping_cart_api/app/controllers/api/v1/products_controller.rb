@@ -1,5 +1,5 @@
 class Api::V1::ProductsController < ApplicationController
-  skip_before_action :authenticate, only: [:index]
+  skip_before_action :authenticate, only: [:index, :show]
 
   before_action :set_product, only: [:show, :update, :destroy]
 
@@ -21,10 +21,14 @@ class Api::V1::ProductsController < ApplicationController
   def show
     authorize @product
     render json: product_json(@product)
+  rescue ActiveRecord::RecodeNotFound
+    render json: { error: 'Product not found' }, status: :not_found
   end
 
   def create
     product = Product.new(product_params)
+    authorize product
+    
     if product.save
       render json: product_json(product), status: :created
     else
@@ -33,18 +37,24 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def update
+    authorize @product
     if(@product.update(product_params))
       render json: product_json(@product), status: :ok
     else
       render json: { error: @product.errors.full_messages }, status: :unprocessable_entity
     end
+  rescue ActiveRecord::RecodeNotFound
+    render json: { error: 'Product not found' }, status: :not_found
   end
 
   def destroy
+    authorize @product
     @product.destroy
     head :no_content
   rescue ActiveRecord::InvalidForeignKey
     render json: { error: "This product can not be deleted, because there are any order or cart has this product" }, status: :unprocessable_entity
+  rescue ActiveRecord::RecodeNotFound
+    render json: { error: 'Product not found' }, status: :not_found
   end
 
   def product_params
