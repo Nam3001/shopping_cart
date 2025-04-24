@@ -13,9 +13,12 @@ module Authentication
   private
 
   def authenticate
+
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
     decoded_token = JsonWebToken.decode(token)
+
+    # phải check thêm thử xem là token đó đã expired hay chưa
 
     if(JsonWebToken.blacklisted? decoded_token[:jti])
       render json: { error: 'Token has been revoked' }, status: :unauthorized
