@@ -43,6 +43,8 @@ class Api::V1::ProductsController < ApplicationController
     else
       render json: { error: @product.errors.full_messages }, status: :unprocessable_entity
     end
+  rescue ActiveRecord::RecodeNotFound
+    render json: { error: 'Product not found' }, status: :not_found
   end
 
   def destroy
@@ -51,6 +53,8 @@ class Api::V1::ProductsController < ApplicationController
     head :no_content
   rescue ActiveRecord::InvalidForeignKey
     render json: { error: "This product can not be deleted, because there are any order or cart has this product" }, status: :unprocessable_entity
+  rescue ActiveRecord::RecodeNotFound
+    render json: { error: 'Product not found' }, status: :not_found
   end
 
   def product_params
