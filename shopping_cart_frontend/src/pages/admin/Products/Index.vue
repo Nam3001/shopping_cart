@@ -13,7 +13,7 @@
           <th>Price</th>
           <th>Quantity</th>
           <th>Thumbnail</th>
-          <th>Unit</th>
+          <!--<th>Unit</th> -->
           <th>Actions</th>
         </tr>
       </thead>
@@ -25,7 +25,7 @@
           <td>{{ product.quantity }}</td>
           <td class="thumbnail-column"><img class="thumbnail" :src="product.thumbnail_url || thumbnailPlaceholder"
               alt="Product Thumbnail" /></td>
-          <td>{{ product.unit }}</td>
+          <!--<td>{{ product.unit }}</td> -->
           <td>
             <router-link :to="{ name: 'admin-product-edit', params: { id: product.id } }">
               <Button class-name="update-btn">Update</Button>
@@ -81,7 +81,11 @@ export default {
         api.delete(PATHS.deleteProduct(productId))
           .then(() => {
             alert('Product deleted successfully');
-            this.fetchProducts();
+
+            if(this.currentPage > 1) 
+              this.$router.push({ name: 'admin-products', query: { page: 1 } });
+            else 
+              this.fetchProducts();
           })
           .catch(error => {
             alert(`Error deleting product: ${ error.message}`);
