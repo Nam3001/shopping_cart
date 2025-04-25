@@ -18,8 +18,7 @@ class Product < ApplicationRecord
             errors.add(:thumbnail, "is too big (max 1MB)")
         end
 
-        acceptable_type = ["image/jpeg", "image/png"]
-        unless acceptable_type.include? thumbnail.content_type
+        unless thumbnail.content_type.start_with?('image/')
             errors.add(:thumbnail, "image must be JPG or PNG")
         end
     end

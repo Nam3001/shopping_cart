@@ -1,7 +1,7 @@
 <template>
   <div class="content-container">
-    <h1 style="margin: 10px 0; text-align: center;">Products list</h1>
-    <div style="display: flex; justify-content: flex-end;">
+    <h1 class="heading">Products list</h1>
+    <div class="create-btn-container">
       <Button class-name="create-product-btn" @click="handleNewProduct">Create new product</Button>
     </div>
     <div class="product-list">
@@ -124,6 +124,14 @@ export default {
 </script>
 
 <style scoped>
+.create-btn-container {
+  display: flex;
+  justify-content: flex-end;
+}
+.heading {
+  margin: 10px 0;
+  text-align: center;
+}
 .content-container {
   padding: 0 20px 20px;
 }

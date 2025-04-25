@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Header />
+    <Header></Header>
     <ProductGrid :products="products" />
     <vue-paginate :page-count="totalPages" :click-handler="handlePagechange" :prev-text="'Prev'" :next-text="'Next'"
       :container-class="'pagination'" :page-class="'page-item'" :active-class="'active'" v-model="currentPage">

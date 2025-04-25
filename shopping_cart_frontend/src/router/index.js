@@ -54,6 +54,11 @@ const routes = [
     component: Login,
   },
   {
+    path: '/not-found',
+    name: 'not-found',
+    component: NotFound
+  },
+  {
     path: '*',
     name: 'not-found',
     component: NotFound
