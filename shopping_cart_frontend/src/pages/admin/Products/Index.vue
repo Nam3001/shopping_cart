@@ -60,7 +60,7 @@ export default {
       products: [],
       thumbnailPlaceholder: 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png',
       currentPage: this.$route.query.page ? Number.parseInt(this.$route.query.page) : 1,
-      perPage: 10,
+      perPage: 3,
       totalPages: 0
     }
   },
@@ -101,7 +101,6 @@ export default {
       })
         .then(response => {
           this.products = response.data.data
-          this.perPage = response.data.pagination.per_page
           this.totalPages = response.data.pagination.total_pages
 
           if(this.currentPage > this.totalPages) {
@@ -114,7 +113,7 @@ export default {
         });
     },
     handlePagechange(pageNum) {
-      this.$router.push({ name: 'admin-products', query: { page: pageNum } });
+      this.$router.push({ name: 'admin-products', query: { page: pageNum, per_page: this.perPage } });
     },
     handleNewProduct() {
       this.$router.push({ name: 'admin-product-create' });
