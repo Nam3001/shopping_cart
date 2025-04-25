@@ -12,6 +12,7 @@ gem "puma", ">= 5.0"
 gem 'jwt'
 gem 'kaminari'
 gem 'rack-cors'
+gem 'graphql'
 group :development, :test do
   gem 'byebug'
   gem 'rspec-rails', '~> 7.1'

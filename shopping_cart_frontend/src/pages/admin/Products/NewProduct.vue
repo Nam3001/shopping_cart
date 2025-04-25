@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div style="padding: 10px 50px;">
-      <h1 style="margin: 10px; text-align: center;">Create new Product</h1>
+    <div class="container">
+      <h1 class="heading">Create new Product</h1>
       <form @submit.prevent="handleSubmit">
         <label for="productName">Product Name:</label>
         <BaseInput v-model="productName" id="productName" required />
@@ -14,13 +14,13 @@
 
 
         <label for="thumbnailUrl">Thumbnail:</label>
-        <input style="width: 100%; margin-top: 8px;" type="file" id="thumbnailUrl" accept="image/*"
+        <input class="file-input" type="file" id="thumbnailUrl" accept="image/*"
           @change="handleFileUpload" required />
         <br />
 
-        <div v-if="thumbnail">
-          <p style="margin-top: 10px;">Preview thumbnail:</p>
-          <img :src="thumbnail_url" alt="Preview" style="height: 100px; margin: 10px 0;" />
+        <div class="thumbnail-control" v-if="thumbnail">
+          <p>Preview thumbnail:</p>
+          <img :src="thumbnail_url" alt="Preview" />
         </div>
 
         <!-- <label for="unit">Unit:</label> -->
@@ -92,6 +92,28 @@ export default {
 }
 </script>
 <style scoped>
+.thumbnail-control {
+  p {
+    height: 100px;
+    margin: 10px 0;
+  }
+  
+  img {
+    height: 100px;
+    margin: 10px 0;
+  }
+}
+.file-input {
+  width: 100%;
+  margin-top: 8px;
+}
+.heading {
+  margin: 10px;
+  text-align: center;
+}
+.container {
+  padding: 10px 50px;
+}
 #submit {
   background-color: #007204;
   /* Green */

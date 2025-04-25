@@ -35,32 +35,36 @@ export default {
     LoginLogout,
   },
   methods: {
-    handleSubmit(e) {
+    handleSubmit() {
       this.errorMesssages.username = ''
       this.errorMesssages.password = ''
 
-      loginSchema.validate(this.loginData, { abortEarly: false }).then(async() => {
-      this.loading = true;
+      loginSchema.validate(this.loginData, { abortEarly: false })
+      .then(() => {
+        this.loading = true;
 
-      api.post(PATHS.login,{
-        username: this.loginData.username, password: this.loginData.password
-      }).then(response => {
-        localStorage.setItem('access_token', response.data.access_token);
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-  
-        this.$router.replace('/admin')
-      }).catch(() => {
-        this.loading = false;
-      alert("Đăng nhập thất bại, vui lòng kiểm tra lại tài khoản hoặc mật khẩu của bạn!");
-      console.error(e.message)
+        api.post(PATHS.login,{
+          username: this.loginData.username, password: this.loginData.password
+        })
+        .then(response => {
+          localStorage.setItem('access_token', response.data.access_token);
+          localStorage.setItem('refresh_token', response.data.refresh_token);
+
+          this.$router.replace('/admin')
+        })
+        .catch((e) => {
+            this.loading = false;
+            alert("Đăng nhập thất bại, vui lòng kiểm tra lại tài khoản hoặc mật khẩu của bạn!");
+            console.error(e.message)
+          })
       })
-  }).catch(err => {
-    err.inner.forEach(err => {
-      if(this.errorMesssages[err.path].length === 0) {
-        this.errorMesssages[err.path] = err.message;
-      }
-    });
-  })
+      .catch(err => {
+          err.inner.forEach(err => {
+            if(this.errorMesssages[err.path].length === 0) {
+              this.errorMesssages[err.path] = err.message;
+            }
+          });
+        })
     }
   },
   data() {
