@@ -1,7 +1,7 @@
 
 
 class Api::V1::AuthController < ApplicationController
-  skip_before_action :authenticate, only: [:login, :refresh, :logout]
+  skip_before_action :authenticate, only: [:login, :refresh]
   
   def login
     user = User.find_by(username: params[:username])
@@ -35,7 +35,9 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def logout 
-    authenticate  # không check ở callback nữa, vì nếu bị lỗi thì nó sẽ rescue ở callback luôn mà không vào logout
+    # không check ở callback nữa, vì nếu bị lỗi thì nó sẽ rescue ở callback(rescue_from) luôn mà không vào logout, 
+    # vì vậy ta tự gọi authenticate trong logout, để nó tự handle exception
+    authenticate 
 
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
