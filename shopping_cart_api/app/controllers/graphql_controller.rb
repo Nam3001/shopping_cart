@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class GraphqlController < ApplicationController
+  skip_before_action :authenticate
   # If accessing from outside this domain, nullify the session
   # This allows for outside API access while preventing CSRF attacks,
   # but you'll have to authenticate your user separately
@@ -10,9 +11,12 @@ class GraphqlController < ApplicationController
     variables = prepare_variables(params[:variables])
     query = params[:query]
     operation_name = params[:operationName]
+
+    user, payload, access_token = authenticate_request
     context = {
-      # Query context goes here, for example:
-      # current_user: current_user,
+      current_user: user,
+      payload:,
+      access_token:
     }
     result = ShoppingCartApiSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
@@ -48,5 +52,22 @@ class GraphqlController < ApplicationController
     logger.error e.backtrace.join("\n")
 
     render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+  end
+
+  def authenticate_request
+    auth_header = request.headers["Authorization"]
+
+    token = auth_header.split(" ").last if auth_header
+    if token.nil?
+      [ nil, nil, nil ]
+    else
+      begin
+        payload = JsonWebToken.decode(token).with_indifferent_access
+        user = User.find(payload[:user_id])
+        [ user, payload, token ]
+      rescue
+        [ nil, nil, token ]
+      end
+    end
   end
 end

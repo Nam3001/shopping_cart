@@ -1,0 +1,12 @@
+=> 
+[32m#<ActiveStorage::Attached::One:0x00007f84eff1fbf0[0m
+ @name[32m=[0m[31m[1m"[0m[31mthumbnail[0m[31m[1m"[0m,
+ @record[32m=[0m
+  [32m#<Product:0x00007f84ee0adc08[0m
+   id: [34m[1m1[0m,
+   product_name: [31m[1m"[0m[31msamsung[0m[31m[1m"[0m,
+   quantity: [34m[1m200[0m,
+   price: [35m[1m0.2e4[0m,
+   unit_id: [34m[1m1[0m,
+   created_at: [31m[1m"[0m[31m2025-04-15 16:12:55.897676000 +0000[0m[31m[1m"[0m,
+   updated_at: [31m[1m"[0m[31m2025-04-21 12:56:00.650969000 +0000[0m[31m[1m"[0m[32m>[0m[32m>[0m

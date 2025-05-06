@@ -13,6 +13,7 @@ gem 'jwt'
 gem 'kaminari'
 gem 'rack-cors'
 gem 'graphql'
+gem 'apollo_upload_server'
 group :development, :test do
   gem 'byebug'
   gem 'rspec-rails', '~> 7.1'

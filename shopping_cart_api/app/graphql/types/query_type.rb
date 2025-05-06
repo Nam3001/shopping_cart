@@ -6,6 +6,9 @@ module Types
       argument :id, ID, required: true, description: "ID of the object."
     end
 
+    field :products, resolver: Queries::Products::GetAll, connection: false
+    field :get_product_by_id, resolver: Queries::Products::Show
+
     def node(id:)
       context.schema.object_from_id(id, context)
     end
