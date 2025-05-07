@@ -16,7 +16,7 @@ class Mutations::Users::Logout < Mutations::BaseMutation
       errors: []
     }
   rescue JWT::ExpiredSignature
-    # token hết hạn thì vẫn logout thành công
+    # logout still successful even token was expired
     {
       success: true,
       errors: []

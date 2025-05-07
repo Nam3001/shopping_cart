@@ -35,8 +35,8 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def logout 
-    # không check ở callback nữa, vì nếu bị lỗi thì nó sẽ rescue ở callback(rescue_from) luôn mà không vào logout, 
-    # vì vậy ta tự gọi authenticate trong logout, để nó tự handle exception
+    # don't check authenticated request at callback (action_before), because if there's any exception Arises, that excaption will be catched by "rescue_from" in that callback, and logout action will not be run
+    # so, "authenticate" need to be run in logout to handle exception by itself
     authenticate 
 
     authorize_header = request.headers['Authorization']
@@ -51,7 +51,7 @@ class Api::V1::AuthController < ApplicationController
 
     render json: { message: 'Logged out successfully' }, status: :ok
   rescue JWT::ExpiredSignature
-    # token hết hạn thì vẫn logout thành công
+    # logout still successful even token was expired
     render json: { message: 'Logged out successfully' }, status: :ok
   rescue JWT::DecodeError, JWT::VerificationError => e
     render json: { error: e.message }, status: :unauthorized
