@@ -8,12 +8,5 @@ module Types
     field :login, mutation: Mutations::Users::Login
     field :logout, mutation: Mutations::Users::Logout
     field :refresh, mutation: Mutations::Users::Refresh
-
-    # TODO: remove me
-    field :test_field, String, null: false,
-      description: "An example field added by the generator"
-    def test_field
-      "Hello World"
-    end
   end
 end

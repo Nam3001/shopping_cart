@@ -38,7 +38,7 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def update
-    # authorize @product
+    authorize @product
     if(@product.update(product_params))
       render json: product_json(@product), status: :ok
     else

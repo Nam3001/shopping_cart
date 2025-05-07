@@ -34,7 +34,7 @@ class Mutations::Products::Update < Mutations::BaseMutation
             filename: thumbnail.original_filename,
             content_type: thumbnail.content_type
           )
-          unless product.valid? # chạy validate cho ảnh
+          unless product.valid? # validate image
             raise ActiveRecord::Rollback
           end
         end

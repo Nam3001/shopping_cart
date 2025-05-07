@@ -14,7 +14,5 @@ class Queries::Products::GetAll < Queries::BaseQuery
         total_count: products.total_count
       }
     }
-    
-    # Product.with_attached_thumbnail
   end
 end
