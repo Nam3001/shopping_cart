@@ -2,8 +2,8 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   config.cache_store = :redis_cache_store, {
-    url: "redis://localhost:6379/1",
-    namespace: 'shopping_cart',
+    url: ENV['REDIS_URL'] || "redis://localhost:6379/1",
+    namespace: ENV['REDIS_NAMESPACE'] || 'shopping_cart',
     expires_in: 7.days
   }
 

@@ -94,7 +94,6 @@ export default {
 <style scoped>
 .thumbnail-control {
   p {
-    height: 100px;
     margin: 10px 0;
   }
   

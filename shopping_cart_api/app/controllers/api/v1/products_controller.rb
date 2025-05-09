@@ -7,26 +7,22 @@ class Api::V1::ProductsController < ApplicationController
   @@detail_product_cache_key = "product/v1"
 
   def index
+    authorize Product, policy_class: ProductPolicy
     page = params[:page]
     per_page = params[:per_page] || 10
-    products = Rails.cache.fetch("products/all/v1/page=#{page}/per_page=#{per_page}") do
-      # Product.with_attached_thumbnail.order(created_at: :desc).page(page).per(per_page)
-      # Product.order(created_at: :desc).page(page).per(per_page)
-      Product.page(1).per(1).map(&:attributes) 
+    products = Rails.cache.fetch("#{@@products_cache_key}/page=#{page}/per_page=#{per_page}") do
+      paginatedProduct = Product.with_attached_thumbnail.order(updated_at: :desc).page(page).per(per_page)
+      {
+        data: paginatedProduct.map { |p| product_json(p)},
+        pagination: {
+          current_page: paginatedProduct.current_page,
+          total_pages: paginatedProduct.total_pages,
+          total_count: paginatedProduct.total_count
+        }
+      }
     end
 
-    authorize products
-    render json: {
-      data: products.map { |p| product_json p},
-      pagination: {
-        # current_page: products.current_page,
-        # total_pages: products.total_pages,
-        # total_count: products.total_count
-        current_page: 1,
-        total_pages: 2,
-        total_count: 1
-      }
-    }, status: :ok
+    render json: products, status: :ok
   end
 
   def show
@@ -40,7 +36,6 @@ class Api::V1::ProductsController < ApplicationController
     product = Product.new(product_params)
     authorize product
 
-    
     if product.save
       delete_pagination_products_cache
       render json: product_json(product), status: :created
@@ -51,7 +46,9 @@ class Api::V1::ProductsController < ApplicationController
 
   def update
     authorize @product
-    if(@product.update(product_params))
+    isUpdateSuccess = @product.update(product_params)
+    if(isUpdateSuccess)
+      update_product_cache @product
       delete_pagination_products_cache
       render json: product_json(@product), status: :ok
     else
@@ -63,7 +60,7 @@ class Api::V1::ProductsController < ApplicationController
 
   def destroy
     authorize @product
-    @product.destroy?
+    @product.destroy!
 
     delete_pagination_products_cache
 
@@ -93,6 +90,13 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def delete_pagination_products_cache
-    Rails.cache.delete_matched("#{@@detail_product_cache_key}/page=*")
+    $redis.keys("#{ENV['REDIS_NAMESPACE']}:#{@@products_cache_key}/page=*").each do |key|
+      $redis.del key
+    end
+  end
+
+  def update_product_cache(product)
+    cache_key = "#{@@detail_product_cache_key}/#{params[:id]}"
+    Rails.cache.write(cache_key, product)
   end
 end

@@ -60,7 +60,7 @@ export default {
       products: [],
       thumbnailPlaceholder: 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png',
       currentPage: this.$route.query.page ? Number.parseInt(this.$route.query.page) : 1,
-      perPage: 3,
+      perPage: 10,
       totalPages: 0
     }
   },
@@ -85,7 +85,7 @@ export default {
             if(this.currentPage > 1) 
               this.$router.push({ name: 'admin-products', query: { page: 1 } });
             else 
-              this.fetchProducts();
+              this.fetchProducts(1, this.perPage);
           })
           .catch(error => {
             alert(`Error deleting product: ${ error.message}`);
