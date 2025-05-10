@@ -8,7 +8,7 @@ class Queries::Products::GetAll < Queries::BaseQuery
     products = Rails.cache.fetch("products/all/graphql/page=#{page}/per_page=#{per_page}") do
       paginatedProduct = Product.with_attached_thumbnail.order(updated_at: :desc).page(page).per(per_page)
       {
-        products: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer),
+        products: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json,
         pagination: {
           current_page: paginatedProduct.current_page,
           total_pages: paginatedProduct.total_pages,
