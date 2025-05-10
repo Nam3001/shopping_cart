@@ -34,20 +34,30 @@ export default {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 20px;
-  padding: 20px;
+  padding: 20px 80px;
 }
 
-@media (max-width: 968px) {
+@media (max-width: 1080px) {
   .product-grid {
     grid-template-columns: repeat(3, 1fr);
+    padding: 20px 80px;
+  }
+}
+
+@media (max-width: 720px) {
+  .product-grid {
+    padding: 20px 40px;
   }
 }
 
 @media (max-width: 550px) {
   .product-grid {
     grid-template-columns: repeat(1, 1fr);
+    padding: 20px;
   }
 }
+
+
 .product-card {
   border: 1px solid #ddd;
   border-radius: 10px;

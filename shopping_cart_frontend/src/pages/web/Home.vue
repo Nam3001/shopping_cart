@@ -30,7 +30,7 @@ export default {
       products: [],
       thumbnailPlaceholder: 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png',
       currentPage: this.$route.query.page ? Number.parseInt(this.$route.query.page) : 1,
-      perPage: 5,
+      perPage: 10,
       totalPages: 0
     }
   },

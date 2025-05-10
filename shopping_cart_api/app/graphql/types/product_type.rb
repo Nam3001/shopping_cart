@@ -12,7 +12,19 @@ module Types
     field :thumbnail_url, String, null: true
 
     def thumbnail_url
-      object.thumbnail.attached? ? Rails.application.routes.url_helpers.rails_blob_url(object.thumbnail, only_path: true) : nil
+      if object.is_a? Product
+        object.thumbnail.attached? ? Rails.application.routes.url_helpers.rails_blob_url(object.thumbnail) : nil
+      else
+        if object[:thumbnail_url]
+          object[:thumbnail_url]
+        else
+          begin
+            object[:thumbnail]&.attached? ? Rails.application.routes.url_helpers.rails_blob_url(object[:thumbnail]) : nil
+          rescue
+            nil
+          end
+        end
+      end
     end
   end
 end
