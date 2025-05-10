@@ -1,4 +1,8 @@
 class Product < ApplicationRecord
+    after_destroy :delete_product_pagination_cache
+    after_create :delete_product_pagination_cache
+    after_update :update_cache_after_update_product
+
     belongs_to :unit
     has_one_attached :thumbnail
     
@@ -21,5 +25,16 @@ class Product < ApplicationRecord
         unless thumbnail.content_type.start_with?('image/')
             errors.add(:thumbnail, "image must be JPG or PNG")
         end
+    end
+
+    def delete_product_pagination_cache
+      RedisHelper.delete_pagination_cache("products/all")
+    end
+
+    def update_cache_after_update_product
+      delete_product_pagination_cache
+
+      cache_key = "product/#{id}"
+      RedisHelper.update_cache(cache_key, self)
     end
 end

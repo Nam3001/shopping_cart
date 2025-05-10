@@ -3,8 +3,8 @@ class Api::V1::ProductsController < ApplicationController
 
   before_action :set_product, only: [:show, :update, :destroy]
 
-  @@products_cache_key = "products/all/v1"
-  @@detail_product_cache_key = "product/v1"
+  @@products_cache_key = "products/all"
+  @@detail_product_cache_key = "product"
 
   def index
     authorize Product, policy_class: ProductPolicy
@@ -13,7 +13,7 @@ class Api::V1::ProductsController < ApplicationController
     products = Rails.cache.fetch("#{@@products_cache_key}/page=#{page}/per_page=#{per_page}") do
       paginatedProduct = Product.with_attached_thumbnail.order(updated_at: :desc).page(page).per(per_page)
       {
-        data: paginatedProduct.map { |p| product_json(p)},
+        data: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json,
         pagination: {
           current_page: paginatedProduct.current_page,
           total_pages: paginatedProduct.total_pages,
@@ -27,7 +27,7 @@ class Api::V1::ProductsController < ApplicationController
 
   def show
     authorize @product
-    render json: product_json(@product)
+    render json: @product, status: :ok
   rescue ActiveRecord::RecodeNotFound
     render json: { error: 'Product not found' }, status: :not_found
   end
@@ -37,8 +37,7 @@ class Api::V1::ProductsController < ApplicationController
     authorize product
 
     if product.save
-      delete_pagination_products_cache
-      render json: product_json(product), status: :created
+      render json: product, status: :created
     else
       render json: { error: product.errors.full_messages }, status: :unprocessable_entity
     end
@@ -48,9 +47,7 @@ class Api::V1::ProductsController < ApplicationController
     authorize @product
     isUpdateSuccess = @product.update(product_params)
     if(isUpdateSuccess)
-      update_product_cache @product
-      delete_pagination_products_cache
-      render json: product_json(@product), status: :ok
+      render json: @product, status: :ok
     else
       render json: { error: @product.errors.full_messages }, status: :unprocessable_entity
     end
@@ -61,8 +58,6 @@ class Api::V1::ProductsController < ApplicationController
   def destroy
     authorize @product
     @product.destroy!
-
-    delete_pagination_products_cache
 
     head :no_content
   rescue ActiveRecord::InvalidForeignKey
@@ -78,25 +73,11 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   private
-  def product_json(product)
-    product.as_json.merge(thumbnail_url: product.thumbnail.attached? ? url_for(product.thumbnail) : "")
-  end
 
   def set_product
     cache_key = "#{@@detail_product_cache_key}/#{params[:id]}"
     @product = Rails.cache.fetch(cache_key) do
       Product.find(params[:id])
     end
-  end
-
-  def delete_pagination_products_cache
-    $redis.keys("#{ENV['REDIS_NAMESPACE']}:#{@@products_cache_key}/page=*").each do |key|
-      $redis.del key
-    end
-  end
-
-  def update_product_cache(product)
-    cache_key = "#{@@detail_product_cache_key}/#{params[:id]}"
-    Rails.cache.write(cache_key, product)
   end
 end

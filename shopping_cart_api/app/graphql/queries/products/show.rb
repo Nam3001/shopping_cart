@@ -3,6 +3,16 @@ class Queries::Products::Show < Queries::BaseQuery
   type Types::ProductType, null: true
 
   def resolve(id:)
-    Product.find(id)
+    begin
+      cache_key = "product/#{id}"
+      
+      Rails.cache.fetch(cache_key) do
+        Product.find(id)
+      end
+    rescue ActiveRecord::RecordNotFound
+      raise GraphQL::ExecutionError, "Product #{id} not found"
+    rescue => e
+      raise GraphQL::ExecutionError, "An error occur: #{e.message}"
+    end
   end
 end
