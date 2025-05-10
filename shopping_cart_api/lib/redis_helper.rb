@@ -9,5 +9,9 @@ class RedisHelper
     def update_cache(cache_key, value)
       Rails.cache.write(cache_key, value)
     end
+
+    def delete_cache(cache_key)
+      Rails.cache.delete(cache_key)
+    end
   end
 end

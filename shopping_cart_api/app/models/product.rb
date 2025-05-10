@@ -1,7 +1,7 @@
 class Product < ApplicationRecord
-    after_destroy :delete_product_pagination_cache
-    after_create :delete_product_pagination_cache
-    after_update :update_cache_after_update_product
+    after_destroy :handle_caching_after_destroy_product
+    after_create :handle_caching_after_create_product
+    after_update :handle_caching_after_update_product
 
     belongs_to :unit
     has_one_attached :thumbnail
@@ -31,7 +31,19 @@ class Product < ApplicationRecord
       RedisHelper.delete_pagination_cache("products/all")
     end
 
-    def update_cache_after_update_product
+    def handle_caching_after_create_product
+      delete_product_pagination_cache
+    end
+
+    def handle_caching_after_destroy_product
+      delete_product_pagination_cache
+
+      # delete deleted product information
+      cache_key = "product/#{id}"
+      RedisHelper.delete_cache(cache_key)
+    end
+
+    def handle_caching_after_update_product
       delete_product_pagination_cache
 
       cache_key = "product/#{id}"

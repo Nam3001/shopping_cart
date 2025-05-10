@@ -59,6 +59,7 @@ class Api::V1::ProductsController < ApplicationController
     authorize @product
     @product.destroy!
 
+
     head :no_content
   rescue ActiveRecord::InvalidForeignKey
     render json: { error: "This product can not be deleted, because there are any order or cart has this product" }, status: :unprocessable_entity
