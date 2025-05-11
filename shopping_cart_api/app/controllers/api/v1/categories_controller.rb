@@ -58,7 +58,7 @@ class Api::V1::CategoriesController < ApplicationController
       if @category.update(category_params)
         render json: @category, status: :ok
       else
-        render json: { error: "update product fail" }, status: :unprocessable_entity
+        render json: { error: "Update category fail" }, status: :unprocessable_entity
       end
     rescue => e 
       render json: { error: e.message }, status: :internal_server_error

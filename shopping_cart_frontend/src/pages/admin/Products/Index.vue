@@ -87,8 +87,9 @@ export default {
             else 
               this.fetchProducts(1, this.perPage);
           })
-          .catch(error => {
-            alert(`Error deleting product: ${ error.message}`);
+          .catch((e) => {
+            let errorMessage = e.response?.data?.error
+            alert(`Error deleting product: ${ errorMessage }`);
           });
       }
     },
@@ -108,8 +109,9 @@ export default {
             this.$router.push({ name: 'admin-products', query: { page: this.totalPages } });
           }
         })
-        .catch(error => {
-          console.error('Error fetching products:', error);
+        .catch((e) => {
+          let errorMessage = e.response?.data?.error
+          console.error('Error fetching products:', errorMessage);
         });
     },
     handlePagechange(pageNum) {

@@ -54,8 +54,8 @@ export default {
         })
         .catch((e) => {
             this.loading = false;
-            alert("Đăng nhập thất bại, vui lòng kiểm tra lại tài khoản hoặc mật khẩu của bạn!");
-            console.error(e.message)
+            let errorMessage = e.response?.data?.error
+            alert(errorMessage);
           })
       })
       .catch(err => {

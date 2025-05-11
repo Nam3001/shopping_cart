@@ -62,7 +62,8 @@ export default {
       data.append('price', this.price);
       data.append('quantity', this.quantity);
       data.append('thumbnail', this.thumbnail);
-      data.append('unit_id', 1); // Assuming unit is a number, you can change it to the appropriate value
+      data.append('unit_id', 4); // Assuming unit is a number, you can change it to the appropriate value
+      data.append('category_id', 2)
 
       try {
         await api.post('/products', data, {
@@ -75,7 +76,8 @@ export default {
         alert('Product created successfully');
         this.$router.replace({ name: 'admin-products' });
       } catch (error) {
-        alert('Error creating product:' + error);
+         const errorMessages = error.response?.data?.error || 'Unknown error';
+        alert('Error creating product:' + errorMessages);
       }
     },
     handleFileUpload(e) {

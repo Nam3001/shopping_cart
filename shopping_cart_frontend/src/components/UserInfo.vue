@@ -12,7 +12,6 @@
   </div>
 </template>
 <script>
-// import api from '@/services/api.js'
 import logoutUser from '@/utils/logoutUser';
 
   export default {
@@ -27,6 +26,9 @@ import logoutUser from '@/utils/logoutUser';
       handleLogout() {
         logoutUser(this.logoutPath).then(() => {
           this.$router.replace({ name: 'login' });
+        }).catch(e => {
+          let errorMessage = e.response?.data?.error
+          alert("Logout failed: " + errorMessage)
         })
       }
     }
