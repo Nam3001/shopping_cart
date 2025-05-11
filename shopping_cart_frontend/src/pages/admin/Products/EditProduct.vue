@@ -77,7 +77,8 @@ export default {
         alert('Product created successfully');
         this.$router.replace({ name: 'admin-products' });
       } catch (error) {
-        alert('Error updating product: ' + error);
+        let errorMessage = error.response?.data?.error
+        alert('Error updating product: ' + errorMessage);
       }
     },
     handleFileUpload(e) {
@@ -99,8 +100,7 @@ export default {
           this.currentThumbnail = this.product.thumbnail_url;
 
         })
-        .catch(error => {
-          console.error('Error fetching products:', error);
+        .catch(() => {
           this.$router.replace({ name: 'not-found' })
         });
     }

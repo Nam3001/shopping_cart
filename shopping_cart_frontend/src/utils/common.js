@@ -1,5 +1,6 @@
 import api from "@/services/api";
 import PATHS from "@/services/paths";
+import router from '@/router'
 
 export async function checkLoggedIn() {
   try {
@@ -14,6 +15,9 @@ export async function checkLoggedIn() {
 }
 
 export function handleExpiredRefreshToken() {
-  console.log('Login session was expired, please login again');
-  window.location.assign('admin/login')
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('refresh_token')
+
+  alert('Login session was expired, please login again');
+  router.push({ name: 'login' })
 }

@@ -71,15 +71,19 @@ export function handleResponseInterceptor(api) {
       previousRequest._retry = true
 
       if(isRefreshing) {
-        // return a promise, and add that promise to queue to wait to handle(resolve/reject) when finishing getting new access token by using refresh token
-        return new Promise((resolve, reject) => {
-          failedQueue.push(resolve, reject)
-        })
-        .then((token) => {
-          attachNewAccessToken(previousRequest, token)
-          return api(previousRequest)
-        })
-        .catch((err) => Promise.reject(err))
+        if(error?.config?.url !== PATHS.refresh) {
+          // return a promise, and add that promise to queue to wait to handle(resolve/reject) when finishing getting new access token by using refresh token
+          return new Promise((resolve, reject) => {
+            failedQueue.push(resolve, reject)
+          })
+          .then((token) => {
+            attachNewAccessToken(previousRequest, token)
+            return api(previousRequest)
+          })
+          .catch((err) => Promise.reject(err))
+        } else {
+          return Promise.reject(error)
+        }
       }
 
       let refresh_token = localStorage.getItem('refresh_token')
@@ -89,6 +93,7 @@ export function handleResponseInterceptor(api) {
       }
 
       try {
+        isRefreshing = true
         let response = await api.post(PATHS.refresh, { refresh_token })
         let { access_token } = response.data
         

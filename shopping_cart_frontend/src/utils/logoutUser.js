@@ -6,7 +6,4 @@ export default function (logoutPath) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
     })
-    .catch((error) => {
-      alert('Logout failed:', error);
-    });
 }
