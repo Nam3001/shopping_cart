@@ -4,6 +4,7 @@ class Product < ApplicationRecord
     after_update :handle_caching_after_update_product
 
     belongs_to :unit
+    belongs_to :category
     has_one_attached :thumbnail
     
     validates :product_name, presence: true
@@ -11,6 +12,8 @@ class Product < ApplicationRecord
     validates :thumbnail, presence: true
     validates :quantity, presence: true, comparison: { greater_than_or_equal_to: 0 }
     validates_comparison_of :quantity, greater_than_or_equal_to: 0
+    validates :unit_id, presence: true
+    validates :category_id, presence: true
 
     validate :acceptable_thumbnail
 
@@ -45,6 +48,9 @@ class Product < ApplicationRecord
 
     def handle_caching_after_update_product
       delete_product_pagination_cache
+      
+      # delete list of products of category cache
+      RedisHelper.delete_pagination_cache("category/#{category_id}/products/all")
 
       cache_key = "product/#{id}"
       RedisHelper.update_cache(cache_key, self)

@@ -1,7 +1,7 @@
 
 
 class Api::V1::AuthController < ApplicationController
-  skip_before_action :authenticate, only: [:login, :refresh]
+  skip_before_action :authenticate, only: [:login, :refresh, :logout]
   
   def login
     user = User.find_by(username: params[:username])
@@ -34,15 +34,28 @@ class Api::V1::AuthController < ApplicationController
     render json: { error: "decode error" }, status: :unauthorized
   end
 
-  def logout 
-    # don't check authenticated request at callback (action_before), because if there's any exception Arises, that excaption will be catched by "rescue_from" in that callback, and logout action will not be run
-    # so, "authenticate" need to be run in logout to handle exception by itself
-    authenticate 
-
+  def logout
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
 
+    unless token
+      render json: { message: 'Logged out successfully' }, status: :ok
+      return
+    end
+
     decoded_token = JsonWebToken.decode(token)
+
+    
+    # checking user either exist or not
+    @current_user = User.find(decoded_token[:user_id])
+    if @current_user.nil?
+      render json: { message: 'Logged out successfully' }, status: :ok
+      return
+    elsif JsonWebToken.blacklisted? decoded_token[:jti]
+      render json: { message: 'Logged out successfully' }, status: :ok
+      return
+    end
+
 
     TokenBlackList.create!(
       jti: decoded_token[:jti],
@@ -50,11 +63,8 @@ class Api::V1::AuthController < ApplicationController
     )
 
     render json: { message: 'Logged out successfully' }, status: :ok
-  rescue JWT::ExpiredSignature
-    # logout still successful even token was expired
+  rescue
     render json: { message: 'Logged out successfully' }, status: :ok
-  rescue JWT::DecodeError, JWT::VerificationError => e
-    render json: { error: e.message }, status: :unauthorized
   end
 
   def me

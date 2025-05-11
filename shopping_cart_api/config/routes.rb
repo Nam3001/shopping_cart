@@ -14,6 +14,11 @@ Rails.application.routes.draw do
       get "auth/me", to: "auth#me"
 
       resources :products, except: %i[new edit]
+      resources :categories, excep: %i[new edit] do
+        member do
+          get "products"
+        end
+      end
     end
   end
 

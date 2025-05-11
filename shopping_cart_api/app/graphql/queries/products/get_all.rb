@@ -6,7 +6,7 @@ class Queries::Products::GetAll < Queries::BaseQuery
 
   def resolve(page:, per_page:)
     products = Rails.cache.fetch("products/all/graphql/page=#{page}/per_page=#{per_page}") do
-      paginatedProduct = Product.with_attached_thumbnail.order(updated_at: :desc).page(page).per(per_page)
+      paginatedProduct = Product.with_attached_thumbnail.page(page).per(per_page).order(updated_at: :desc)
       {
         products: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json,
         pagination: {

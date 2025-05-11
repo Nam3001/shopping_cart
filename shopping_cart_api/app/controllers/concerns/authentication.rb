@@ -16,6 +16,12 @@ module Authentication
     
     authorize_header = request.headers['Authorization']
     token = authorize_header.split(' ').last if authorize_header
+
+    unless token
+      render json: { error: "Need to logged in to use this feature!" }, status: :unauthorized
+      return
+    end
+
     decoded_token = JsonWebToken.decode(token)
 
     if decoded_token[:type].eql? 'refresh'
