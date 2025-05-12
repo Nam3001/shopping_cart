@@ -28,6 +28,8 @@
       return {
         sidebarItems: [
           { name: 'Products', path: '/admin/products' },
+          { name: 'Categories', path: '/admin/categories' },
+          { name: 'Units', path: '/admin/units' }
         ],
       }
     },
@@ -76,4 +78,8 @@ body {
   height: var(--navbar-height);
 }
 
+.content {
+  height: calc(100vh - 60px);
+  overflow-y: scroll;
+}
 </style>

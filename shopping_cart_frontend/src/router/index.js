@@ -43,6 +43,57 @@ const routes = [
           requiresAuth: true
         }
       },
+
+      {
+        name: 'admin-categories',
+        path: 'categories',
+        component: () => import('@/pages/admin/Categories/Index.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-category-create',
+        path: 'categories/new',
+        component: () => import('@/pages/admin/Categories/New.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-category-edit',
+        path: 'categories/:id/edit',
+        component: () => import('@/pages/admin/Categories/Edit.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+
+      {
+        name: 'admin-units',
+        path: 'units',
+        component: () => import('@/pages/admin/Units/Index.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-unit-create',
+        path: 'units/new',
+        component: () => import('@/pages/admin/Units/New.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-unit-edit',
+        path: 'units/:id/edit',
+        component: () => import('@/pages/admin/Units/Edit.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+
     ],
     meta: {
       requiresAuth: true
@@ -73,9 +124,9 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('access_token') !== null
-  if(to.meta.requiresAuth && !isAuthenticated) {
+  if (to.meta.requiresAuth && !isAuthenticated) {
     next({ path: '/admin/login' })
-  } else if(to.path === '/admin/login' && isAuthenticated) {
+  } else if (to.path === '/admin/login' && isAuthenticated) {
     next({ path: '/admin' })
   } else {
     next()

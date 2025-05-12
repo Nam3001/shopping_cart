@@ -13,6 +13,31 @@ const PATHS = {
   deleteProduct(id) {
     return `/products/${id}`
   },
+
+  categories: '/categories',
+  categoryInfo(id) {
+    return `/categories/${id}`
+  },
+  createCategory: '/categories',
+  updateCategory(id) {
+    return `categories/${id}`
+  },
+  deleteCategory(id) {
+    return `categories/${id}`
+  },
+
+  units: '/units',
+  unitInfo(id) {
+    return `/units/${id}`
+  },
+  createUnit: '/units',
+  updateUnit(id) {
+    return `units/${id}`
+  },
+  deleteUnit(id) {
+    return `units/${id}`
+  },
+
   me: '/auth/me',
 }
 

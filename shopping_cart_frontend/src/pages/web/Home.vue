@@ -35,65 +35,46 @@ export default {
     }
   },
   mounted() {
-    this.currentPage = this.$route.query.page ? Number.parseInt(this.$route.query.page) : 1;
-    this.fetchProducts(this.$route.query.page, this.perPage);
+    this.fetchProducts(this.$route?.query?.page, this.$route?.query?.per_page);
   },
   watch: {
     '$route.query.page': function (newPage) {
-      this.currentPage = this.$route.query.page ? Number.parseInt(this.$route.query.page) : 1;
-      this.fetchProducts(newPage, this.perPage);
+      this.fetchProducts(newPage, this.$route?.query?.per_page);
+    },
+    '$route.query.per_page': function (newPerPage) {
+      this.fetchProducts(this.$route?.query?.page, newPerPage);
     }
   },
   
   methods: {
-    handleDeleteProduct(productId) {
-      if (confirm('Are you sure you want to delete this product?')) {
-        api.delete(PATHS.deleteProduct(productId))
-          .then(() => {
-            alert('Product deleted successfully');
-
-            if(this.currentPage > 1) 
-              this.$router.push({ name: 'admin-products', query: { page: 1 } });
-            else 
-              this.fetchProducts(this.currentPage, this.perPage);
-          })
-          .catch(e => {
-            let errorMessage = e.response?.data?.error
-            alert(`Error deleting product: ${ errorMessage }`);
-          });
-      }
-    },
     fetchProducts(page = 1, perPage) {
-      if(!perPage) perPage = this.perPage
-      
-      api.get(PATHS.products, {
-          params: {
-            page: page,
-            per_page: perPage
-          }
+      if(!perPage) perPage = this.$route?.query?.per_page || 10
+        api.get(PATHS.products, {
+        params: {
+          page: page,
+          per_page: perPage
+        }
       })
         .then(response => {
-          this.products = response.data.data
-          // this.perPage = response.data.pagination.per_page
-          this.totalPages = response.data.pagination.total_pages
+          this.products = response.data.products
+          this.totalPages = response.data.pagination.total_pages === 0 ? 1 : response.data.pagination.total_pages
 
-          if(this.currentPage > this.totalPages) {
-            
-            this.$router.push({ name: 'home', query: { page: this.totalPages } });
+          let currentPage = Number.parseInt(this.$route?.query?.page)
+          let perPage = Number.parseInt(this.$route?.query?.per_page)
+          if (currentPage > this.totalPages) {
+
+            this.$router.push({ name: 'home', query: { page: this.totalPages, per_page: perPage } });
           }
         })
-        .catch(e => {
+        .catch((e) => {
           let errorMessage = e.response?.data?.error
           console.error('Error fetching products:', errorMessage);
         });
     },
     handlePagechange(pageNum) {
-      this.$router.push({ name: 'home', query: { page: pageNum, per_page: this.perPage } });
+      this.$router.push({ name: 'home', query: { page: pageNum, per_page: this.$route?.query?.per_page || 10 } });
 
-    },
-    // handleNewProduct() {
-    //   this.$router.push({ name: 'admin-product-create' });
-    // }
+    }
   }
 }
 </script>
