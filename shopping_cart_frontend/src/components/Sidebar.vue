@@ -1,7 +1,7 @@
 <template>
   <aside class="sidebar">
     <div class="sidebar-header">
-      <h2>Admin Panel</h2>
+      <h2 @click="goToHome">Admin Panel</h2>
     </div>
     <ul>
       <SidebarItem v-for="(item, index) in items" :key="index" :name="item.name" :to="item.path" />
@@ -21,6 +21,11 @@ export default {
   },
   components: {
     SidebarItem
+  },
+  methods: {
+    goToHome() {
+      this.$router.push({name: 'admin-home'})
+    }
   }
 }
 </script>
@@ -35,6 +40,7 @@ export default {
 .sidebar-header h2 {
   padding: 10px 20px;
   color: #fff;
+  cursor: pointer;
 }
 
 .sidebar ul {

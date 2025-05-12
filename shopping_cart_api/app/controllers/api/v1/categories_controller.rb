@@ -7,18 +7,29 @@ class Api::V1::CategoriesController < ApplicationController
 
   def index
     begin
-      page = params[:page] || 1
-      per_page = params[:per_page] || 10
-      respondData = Rails.cache.fetch("#{@@categories_cache_key}/page=#{page}/per_page=#{per_page}") do
-        paginated = Category.page(page).per(per_page).order(updated_at: :desc)
-        {
-          categories: paginated.as_json,
-          pagination: {
-            current_page: paginated.current_page,
-            total_pages: paginated.total_pages,
-            total_count: paginated.total_count
+      page = params[:page]
+      per_page = params[:per_page]
+      respondData = nil
+      
+      if page && per_page
+        respondData = Rails.cache.fetch("#{@@categories_cache_key}/page=#{page}/per_page=#{per_page}") do
+          paginated = Category.page(page).per(per_page).order(updated_at: :desc)
+          {
+            categories: paginated.as_json,
+            pagination: {
+              current_page: paginated.current_page,
+              total_pages: paginated.total_pages,
+              total_count: paginated.total_count
+            }
           }
-        }
+        end
+      else
+        respondData = Rails.cache.fetch("#{@@categories_cache_key}") do
+          paginated = Category.order(updated_at: :desc)
+          {
+            categories: paginated.as_json
+          }
+        end
       end
       render json: respondData, status: :ok
     rescue => e 

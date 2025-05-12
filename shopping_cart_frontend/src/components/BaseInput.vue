@@ -1,5 +1,5 @@
 <template lang="">
-  <input  :value="value" @input="$emit('input', $event.target.value)" v-bind="$attrs" />
+  <input :value="value" @input="$emit('input', $event.target.value)" v-bind="$attrs" />
 </template>
 <script>
 export default {
@@ -19,5 +19,5 @@ export default {
 }
 </style>
 
-<!-- component cha sẽ dùng như này: -->
- <!-- <BaseInput v-model="model" /> => sẽ tương đương với: <BaseInput :value="model" @input="model = $event " />  -->
+<!-- usage: -->
+ <!-- <BaseInput v-model="model" /> => corresponding: <BaseInput :value="model" @input="model = $event " />  -->

@@ -9,18 +9,29 @@ class Api::V1::ProductsController < ApplicationController
   def index
     authorize Product, policy_class: ProductPolicy
     begin
-      page = params[:page] || 1
-      per_page = params[:per_page] || 10
-      products = Rails.cache.fetch("#{@@products_cache_key}/page=#{page}/per_page=#{per_page}") do
-        paginatedProduct = Product.with_attached_thumbnail.page(page).per(per_page).order(updated_at: :desc)
-        {
-          data: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json,
-          pagination: {
-            current_page: paginatedProduct.current_page,
-            total_pages: paginatedProduct.total_pages,
-            total_count: paginatedProduct.total_count
+      page = params[:page]
+      per_page = params[:per_page]
+      products = nil
+
+      if page && per_page
+        products = Rails.cache.fetch("#{@@products_cache_key}/page=#{page}/per_page=#{per_page}") do
+        paginatedProduct = Product.includes(:category, :unit).with_attached_thumbnail.page(page).per(per_page).order(updated_at: :desc)
+          {
+            products: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json,
+            pagination: {
+              current_page: paginatedProduct.current_page,
+              total_pages: paginatedProduct.total_pages,
+              total_count: paginatedProduct.total_count
+            }
           }
-        }
+        end
+      else
+        products = Rails.cache.fetch("#{@@products_cache_key}") do
+        paginatedProduct = Product.includes(:category, :unit).with_attached_thumbnail.order(updated_at: :desc)
+          {
+            products: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json
+          }
+        end
       end
 
       render json: products, status: :ok
