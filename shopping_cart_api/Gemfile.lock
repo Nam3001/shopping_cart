@@ -307,6 +307,9 @@ GEM
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
     ruby-progressbar (1.13.0)
+    sanitize (7.0.0)
+      crass (~> 1.0.2)
+      nokogiri (>= 1.16.8)
     securerandom (0.4.1)
     shoulda-matchers (6.4.0)
       activesupport (>= 5.2.0)
@@ -375,6 +378,7 @@ DEPENDENCIES
   redis
   rspec-rails (~> 7.1)
   rubocop-rails-omakase
+  sanitize (~> 7.0)
   shoulda-matchers (~> 6.4)
   solid_cable
   solid_cache

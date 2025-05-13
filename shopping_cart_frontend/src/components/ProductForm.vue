@@ -13,12 +13,12 @@
         <BaseInput type="number" v-model="quantity" id="quantity" required />
 
         <label for="unit">Unit:</label>
-        <select name="unit" id="unit" v-model="selectedUnit">
+        <select name="unit" id="unit" v-model="selectedUnit" required>
           <option v-for="unit in unitList" :value="unit.id" :key="unit.id">{{ unit.unit_name }}</option>
         </select>
 
         <label for="category">Category:</label>
-        <select name="category" id="category" v-model="selectedCategory">
+        <select name="category" id="category" v-model="selectedCategory" required>
           <option v-for="category in categoryList" :value="category.id" :key="category.id">{{ category.name }}</option>
         </select>
 
@@ -39,6 +39,9 @@
           </div>
         </div>
 
+        <label>Description:</label>
+        <quill-editor v-model="editorDescriptionContent" :options="editorOptions" />
+
         <input id="submit" type="submit" :value="this.type === 'new' ? 'Create' : 'Update'" />
       </form>
     </div>
@@ -50,6 +53,7 @@
 import BaseInput from '@/components/BaseInput.vue';
 import api from '@/services/api';
 import PATHS from '@/services/paths';
+import DOMPurify from 'dompurify'
 
 export default {
   props: {
@@ -73,7 +77,29 @@ export default {
       unitList: [],
       categoryList: [],
       selectedCategory: null,
-      selectedUnit: null
+      selectedUnit: null,
+      editorDescriptionContent: '',
+       editorOptions: {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ header: 1 }, { header: 2 }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ script: 'sub' }, { script: 'super' }],
+            [{ indent: '-1' }, { indent: '+1' }],
+            [{ direction: 'rtl' }],
+            [{ size: ['small', false, 'large', 'huge'] }],
+            [{ header: [1, 2, 3, 4, 5, 6, false] }],
+            [{ color: [] }, { background: [] }],
+            [{ font: [] }],
+            [{ align: [] }],
+            ['link'],
+            ['clean']
+          ]
+        }
+      }
     }
   },
   components: {
@@ -106,13 +132,16 @@ export default {
       }
     },
     handleSubmit() {
+       const cleanDescription = DOMPurify.sanitize(this.editorDescriptionContent)
+
       let data = {
         productName: this.productName,
         price: this.price,
         quantity: this.quantity,
         thumbnail: this.thumbnail,
         unitId: this.selectedUnit,
-        categoryId: this.selectedCategory
+        categoryId: this.selectedCategory,
+        description: cleanDescription
       }
 
       if(this.type === 'edit') 
@@ -124,14 +153,13 @@ export default {
       let productId = this.$route.params.id
       api.get(PATHS.productInfo(productId))
         .then(response => {
-          this.product = response.data
-
           this.productName = response.data.product_name
           this.price = response.data.price
           this.quantity = response.data.quantity
           this.thumbnailUrl = response.data.thumbnail_url
           this.selectedCategory = response.data.category.id
           this.selectedUnit = response.data.unit.id
+          this.editorDescriptionContent = response.data.description
         })
         .catch(() => {
           this.$router.replace({ name: 'not-found' })
@@ -218,5 +246,11 @@ option {
   padding: 10px;
   color: #333;
   background-color: #fff;
+}
+</style>
+
+<style lang="css">
+.ql-editor {
+  min-height: 300px;
 }
 </style>

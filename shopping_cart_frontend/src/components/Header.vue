@@ -1,6 +1,6 @@
 <template>
   <header class="main-header">
-    <div class="logo">🛍️ MyShop</div>
+     <div class="logo" @click="$router.push({ name: 'home'})">🛍️ MyShop</div>
     <nav class="nav-links">
       <a href="#" class="nav-link">Trang chủ</a>
       <a href="#" class="nav-link">Sản phẩm</a>
@@ -28,6 +28,7 @@ export default {
 .logo {
   font-size: 22px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .nav-links {

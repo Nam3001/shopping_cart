@@ -27,6 +27,7 @@ export default {
       data.append('quantity', product.quantity);
       data.append('unit_id', product.unitId),
       data.append('category_id', product.categoryId)
+      data.append('description', product.description)
 
       if (product.newThumbnail) {
         data.append('thumbnail', product.newThumbnail)
