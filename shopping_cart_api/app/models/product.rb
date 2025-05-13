@@ -1,3 +1,5 @@
+require 'sanitize'
+
 class Product < ApplicationRecord
     after_destroy :handle_caching_after_destroy_product
     after_create :handle_caching_after_create_product
@@ -54,5 +56,9 @@ class Product < ApplicationRecord
 
       cache_key = "product/#{id}"
       RedisHelper.update_cache(cache_key, self)
+    end
+
+    def sanitize_description
+      self.description = Sanitize.fragment(description, Sanitize::Config::RELAXED)
     end
 end

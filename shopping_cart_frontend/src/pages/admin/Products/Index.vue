@@ -43,6 +43,7 @@ import api from '@/services/api.js';
 import PATHS from '@/services/paths';
 import Button from '@/components/Button.vue';
 import Table from '@/components/Table.vue';
+// import DOMPurify from 'dompurify';
 
 
 export default {
@@ -97,7 +98,6 @@ export default {
         }
       })
         .then(response => {
-          console.log(response.data.products)
           this.products = response.data.products
           this.totalPages = response.data.pagination.total_pages === 0 ? 1 : response.data.pagination.total_pages
 

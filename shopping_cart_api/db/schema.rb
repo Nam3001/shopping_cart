@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_11_021146) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_13_024543) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -87,6 +87,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_11_021146) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "category_id", null: false
+    t.text "description", null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["unit_id"], name: "index_products_on_unit_id"
     t.check_constraint "`price` >= 0", name: "check_products_price_positive"

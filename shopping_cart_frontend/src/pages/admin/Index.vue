@@ -6,7 +6,7 @@
 <script>
 import AdminLayout from '@/layouts/AdminLayout.vue';
 export default {
-  name: 'HomePage',
+  name: 'IndexAdmin',
   components: {
     AdminLayout,
   }

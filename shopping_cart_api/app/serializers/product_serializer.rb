@@ -1,5 +1,5 @@
 class ProductSerializer < ActiveModel::Serializer
-  attributes :id, :product_name, :price, :quantity, :created_at, :updated_at, :thumbnail_url
+  attributes :id, :product_name, :price, :quantity, :created_at, :updated_at, :thumbnail_url, :description
 
   belongs_to :category
   belongs_to :unit

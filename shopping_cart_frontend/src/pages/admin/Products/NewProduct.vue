@@ -31,6 +31,7 @@ export default {
       data.append('thumbnail', product?.thumbnail);
       data.append('unit_id', product.unitId); // Assuming unit is a number, you can change it to the appropriate value
       data.append('category_id', product.categoryId)
+      data.append('description', product.description)
       
       try {
         await api.post(PATHS.products, data, {
