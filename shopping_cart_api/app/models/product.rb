@@ -7,22 +7,23 @@ class Product < ApplicationRecord
 
     belongs_to :unit
     belongs_to :category
-    has_one_attached :thumbnail
+    has_many_attached :thumbnails
     
     validates :product_name, presence: true
     validates :price, presence: true, comparison: { greater_than_or_equal_to: 0 }
-    validates :thumbnail, presence: true
+    validates :thumbnails, presence: true
     validates :quantity, presence: true, comparison: { greater_than_or_equal_to: 0 }
     validates_comparison_of :quantity, greater_than_or_equal_to: 0
     validates :unit_id, presence: true
     validates :category_id, presence: true
+    validates :description, presence: true
 
-    validate :acceptable_thumbnail
+    validate :acceptable_thumbnails
 
     private
-    def acceptable_thumbnail
-        return unless thumbnail.attached?
-
+    def acceptable_thumbnails
+      return unless thumbnails.attached?
+      thumbnails.each do |thumbnail|
         if thumbnail.byte_size > 1.megabyte
             errors.add(:thumbnail, "is too big (max 1MB)")
         end
@@ -30,6 +31,7 @@ class Product < ApplicationRecord
         unless thumbnail.content_type.start_with?('image/')
             errors.add(:thumbnail, "image must be JPG or PNG")
         end
+      end
     end
 
     def delete_product_pagination_cache

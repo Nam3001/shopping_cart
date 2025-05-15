@@ -13,7 +13,7 @@ class Api::V1::ProductsController < ApplicationController
       per_page = params[:per_page]
 
       products = Rails.cache.fetch("#{@@products_cache_key}/page=#{page}/per_page=#{per_page}") do
-        paginatedProduct = Product.includes(:category, :unit).with_attached_thumbnail.page(page).per(per_page).order(updated_at: :desc)
+        paginatedProduct = Product.includes(:category, :unit).with_attached_thumbnails.page(page).per(per_page).order(updated_at: :desc)
         {
           products: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json,
           pagination: {
@@ -41,8 +41,7 @@ class Api::V1::ProductsController < ApplicationController
   def create
     product = Product.new(product_params)
     authorize product
-    if product.save
-      
+    if product.save     
       render json: product, status: :created
     else
       render json: { error: product.errors.full_messages }, status: :unprocessable_entity
@@ -51,20 +50,47 @@ class Api::V1::ProductsController < ApplicationController
 
   def update
     authorize @product
-    isUpdateSuccess = @product.update(product_params)
-    if(isUpdateSuccess)
-      render json: @product, status: :ok
-    else
-      render json: { error: @product.errors.full_messages }, status: :unprocessable_entity
+    begin
+      newThumbnails = params[:thumbnails]
+      ActiveRecord::Base.transaction do     
+        begin
+          thumbnails_id_to_delete = params[:thumbnails_id_to_delete]
+          if thumbnails_id_to_delete
+            thumbnails_to_delete = @product.thumbnails.where(id: thumbnails_id_to_delete)
+            thumbnails_to_delete.each(&:purge)
+            @product.reload
+          end
+        rescue
+          raise ActiveRecord::Rollback
+        end
+        
+        if newThumbnails.present?
+          begin
+            @product.thumbnails.attach(newThumbnails)
+          rescue
+            raise ActiveRecord::Rollback
+          end
+
+          unless @product.valid? # validate thumbnails
+            raise ActiveRecord::Rollback
+          end
+        end
+
+        success = @product.update(product_params_for_update)
+        raise ActiveRecord::Rollback unless success
+      end
+      
+    rescue => e 
+        render json: { error: e.message }, status: :unprocessable_entity
+        return
     end
-  rescue => e 
-      render json: { error: e.message }, status: :internal_server_error
+
+    render json: @product, status: :ok
   end
 
   def destroy
     authorize @product
     @product.destroy!
-
 
     head :no_content
   rescue ActiveRecord::InvalidForeignKey
@@ -75,11 +101,16 @@ class Api::V1::ProductsController < ApplicationController
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
-  def product_params
-    params.permit(:product_name, :quantity, :price, :unit_id, :category_id, :thumbnail, :description)
+  private
+
+  def product_params_for_update
+    params.permit(:product_name, :quantity, :price, :unit_id, :category_id, :description)
   end
 
-  private
+  def product_params
+    params.permit(:product_name, :quantity, :price, :unit_id, :category_id, :description, thumbnails: [])
+  end
+
 
   def set_product
     begin

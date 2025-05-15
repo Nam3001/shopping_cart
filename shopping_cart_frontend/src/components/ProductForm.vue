@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="form-container">
-      <h1 class="heading">{{this.type === 'new' ? 'Create new Product' : 'Update product'}}</h1>
+      <h1 class="heading">{{ this.type === 'new' ? 'Create new Product' : 'Update product' }}</h1>
       <form @submit.prevent="handleSubmit">
         <label for="productName">Product Name:</label>
         <BaseInput v-model="productName" id="productName" required />
@@ -22,20 +22,27 @@
           <option v-for="category in categoryList" :value="category.id" :key="category.id">{{ category.name }}</option>
         </select>
 
-        <label for="thumbnail">New thumbnail:</label>
+        <label for="thumbnail">Choose thumbnail:</label>
         <input class="new-thumbnail" type="file" id="thumbnail" accept="image/*" @change="handleFileUpload"
-          :required="this.type === 'new' ? true : !thumbnailUrl || thumbnailUrl?.length === 0" />
+          :required="this.type === 'new' || this.thumbnails.length === 0" multiple />
         <br />
 
         <div class="thumbnail-container">
-          <div class="preview-thumbnail" v-if="thumbnailUrl">
+          <div v-if="thumbnails.length > 0 || newThumbnails.length > 0">
             <p>Thumbnail:</p>
-            <img :src="thumbnailUrl" alt="thumbnail" />
-          </div>
+            <div class="preview-list-thumbnail">
+              <!-- current thumbnails of product -->
+              <div class="preview-thumbnail-item" v-for="thumbnail in thumbnails" :key="thumbnail.thumbnail_id">
+                <img :src="thumbnail.thumbnail_url" alt="thumbnail" />
+                <Button type="button" @click="handleDeleteCurrentThumbnail" :data-thumbnail-id="thumbnail.thumbnail_id">Xóa</Button>
+              </div>
 
-          <div class="new-thumbnail" v-if="newThumbnailUrl">
-            <p>New thumbnail:</p>
-            <img :src="newThumbnailUrl" alt="new thumbnail" />
+              <!-- new thumbnails to add when creating or updating product -->
+              <div class="preview-thumbnail-item" v-for="(newThumbnail, idx) in newThumbnails" :key="newThumbnail.file.name">
+                  <img :src="newThumbnail.url" alt="new thumbnails" />
+                <Button type="button" @click="handleDeleteChoosenThumbnail" :data-thumbnail-index="idx">Xóa</Button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -54,6 +61,7 @@ import BaseInput from '@/components/BaseInput.vue';
 import api from '@/services/api';
 import PATHS from '@/services/paths';
 import DOMPurify from 'dompurify'
+import Button from './Button.vue';
 
 export default {
   props: {
@@ -68,7 +76,9 @@ export default {
   },
   data() {
     return {
-      newThumbnailUrl: null,
+      newThumbnails: [],
+      thumbnails: [],
+      thumbnailsToDelete: [],
       productName: '',
       price: 0,
       quantity: 0,
@@ -79,7 +89,7 @@ export default {
       selectedCategory: null,
       selectedUnit: null,
       editorDescriptionContent: '',
-       editorOptions: {
+      editorOptions: {
         theme: 'snow',
         modules: {
           toolbar: [
@@ -103,10 +113,11 @@ export default {
     }
   },
   components: {
-    BaseInput
+    BaseInput, Button
   },
   mounted() {
-    if(this.type === 'edit')
+    console.log(this.newThumbnails)
+    if (this.type === 'edit')
       this.getProductInfo()
 
     this.getCategories()
@@ -115,38 +126,41 @@ export default {
   methods: {
     handleFileUpload(e) {
       const file = e.target.files[0]
-      this.thumbnail = file
-
-      if(this.type === 'new') {
-        if (file && file.type.startsWith('image/')) {
-        this.thumbnailUrl = URL.createObjectURL(file)
-        } else {
-          this.thumbnailUrl = ''
-        }
-      } else if (this.type === 'edit') {
-        if (file && file.type.startsWith('image/')) {
-          this.newThumbnailUrl = URL.createObjectURL(file)
-        } else {
-          this.newThumbnailUrl = null
-        }
+      if (!file.type.startsWith('image/')) {
+        alert('You can only choose image!')
+        return
       }
+
+      if (file) {
+        this.newThumbnails.push({
+          url: URL.createObjectURL(file),
+          file: file
+        })
+      }
+
     },
     handleSubmit() {
-       const cleanDescription = DOMPurify.sanitize(this.editorDescriptionContent)
+      if(!this.editorDescriptionContent) {
+        alert('Product description cannot be blank!')
+        return
+      }
+
+      const cleanDescription = DOMPurify.sanitize(this.editorDescriptionContent)
 
       let data = {
         productName: this.productName,
         price: this.price,
         quantity: this.quantity,
-        thumbnail: this.thumbnail,
+        thumbnails: this.newThumbnails.map(thumbnail => thumbnail.file),
         unitId: this.selectedUnit,
         categoryId: this.selectedCategory,
-        description: cleanDescription
+        description: cleanDescription,
       }
 
-      if(this.type === 'edit') 
-        data.newThumbnail = this.thumbnail
-      
+      if(this.thumbnailsToDelete.length > 0) {
+        data.thumbnailsToDelete = this.thumbnailsToDelete
+      }
+
       this.onSubmit(data)
     },
     getProductInfo() {
@@ -156,7 +170,7 @@ export default {
           this.productName = response.data.product_name
           this.price = response.data.price
           this.quantity = response.data.quantity
-          this.thumbnailUrl = response.data.thumbnail_url
+          this.thumbnails = response.data.thumbnails
           this.selectedCategory = response.data.category.id
           this.selectedUnit = response.data.unit.id
           this.editorDescriptionContent = response.data.description
@@ -174,32 +188,49 @@ export default {
       api.get(PATHS.units).then(res => {
         this.unitList = res.data?.units
       })
+    },
+    handleDeleteCurrentThumbnail(e) {
+
+      let thumbnailId = Number.parseInt(e.target.dataset.thumbnailId)
+      this.thumbnailsToDelete.push(thumbnailId)
+      this.thumbnails = this.thumbnails.filter(thumbnail => thumbnail.thumbnail_id !== thumbnailId)
+    },
+    handleDeleteChoosenThumbnail(e) {
+      this.newThumbnails.splice(e.target.dataset.thumbnailIndex, 1)
+      console.log(this.newThumbnails)
     }
   }
 }
 </script>
 <style scoped>
 .thumbnail-container {
-  display: flex;
+  /* display: flex; */
 }
+
 .new-thumbnail,
-.preview-thumbnail {
-  width: 300px;
+.preview-list-thumbnail {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
 
-  p {
-    margin-top: 10px;
-  }
+.preview-list-thumbnail p {
+  margin-top: 10px;
+}
 
-  img {
-    height: 100px;
-    margin: 10px 0;
-  }
+.preview-list-thumbnail img {
+  height: 100px;
+  margin: 10px 0;
 }
 
 .new-thumbnail {
   width: 100%;
   margin-top: 8px;
   margin-bottom: 10px;
+}
+
+.preview-thumbnail-item img {
+  display: block;
 }
 
 .form-container {

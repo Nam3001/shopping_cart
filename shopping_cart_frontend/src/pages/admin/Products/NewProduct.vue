@@ -28,11 +28,15 @@ export default {
       data.append('product_name', product?.productName);
       data.append('price', product?.price);
       data.append('quantity', product?.quantity);
-      data.append('thumbnail', product?.thumbnail);
       data.append('unit_id', product.unitId); // Assuming unit is a number, you can change it to the appropriate value
       data.append('category_id', product.categoryId)
       data.append('description', product.description)
-      
+      if(product?.thumbnails) {
+        product.thumbnails.forEach(thumbnail => {
+          data.append('thumbnails[]', thumbnail)
+        });
+      }
+
       try {
         await api.post(PATHS.products, data, {
           headers: {
