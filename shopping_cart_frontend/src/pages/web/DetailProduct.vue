@@ -3,16 +3,16 @@
     <div class="product-detail">
       <div class="product-images">
         <div class="main-image">
-          <img :src="product?.thumbnail_url" alt="Hình ảnh chính">
+          <img :src="product?.thumbnails?.[currentImageIndex].thumbnail_url" alt="Hình ảnh chính">
         </div>
         <div class="thumbnail-images">
-          <img v-for="(image, index) in product?.images" :key="index" :src="image"
+          <img v-for="(thumbnail, index) in product?.thumbnails" :key="thumbnail.id" :src="thumbnail.thumbnail_url"
             :class="{ active: index === currentImageIndex }" @click="currentImageIndex = index" alt="Hình ảnh thu nhỏ">
         </div>
       </div>
 
       <div class="product-info">
-        <h1 class="product-title">{{ product?.name }}</h1>
+        <h1 class="product-title">{{ product?.product_name }}</h1>
         <div class="product-price">
           <span class="original-price" v-if="product?.discountPrice">{{ formatPrice(product?.price) }}</span>
           <span class="discounted-price">{{ formatPrice(product?.discountPrice || product?.price) }}</span>
@@ -41,7 +41,7 @@
             <span>{{ quantity }}</span>
             <button @click="increaseQuantity" :disabled="product.quantity === 0 || quantity === product.quantity">+</button>
           </div>
-          <button class="add-to-cart" @click="addToCart" disabled>Thêm vào giỏ hàng</button>
+          <button class="add-to-cart" @click="addToCart" :disabled="!product?.quantity || product.quantity === 0">Thêm vào giỏ hàng</button>
           <button class="buy-now">Mua ngay</button>
         </div>
 
@@ -101,7 +101,6 @@ export default {
     fetchProductInfo(id) {
       api.get(PATHS.productInfo(id)).then(res => {
         this.product = res.data
-        console.log(this.product)
       }).catch(e => {
          let errorMessage = e.response?.data?.error
           alert("Logout failed: " + errorMessage)
@@ -149,10 +148,13 @@ button[disabled] {
   border: 1px solid #eee;
   border-radius: 4px;
   overflow: hidden;
+  height: 400px;
+  width: 400px;
 }
 
 .main-image img {
   width: 100%;
+  object-fit: cover;
   display: block;
 }
 

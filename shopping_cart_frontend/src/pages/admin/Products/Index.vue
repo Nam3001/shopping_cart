@@ -23,7 +23,7 @@
           <td>{{ product.product_name }}</td>
           <td>{{ product.price }}</td>
           <td>{{ product.quantity }}</td>
-          <td class="thumbnail-column"><img class="thumbnail" :src="product.thumbnail_url || thumbnailPlaceholder"
+          <td class="thumbnail-column"><img class="thumbnail" :src="product?.thumbnails?.[0]?.thumbnail_url || thumbnailPlaceholder"
               alt="Product Thumbnail" /></td>
           <td>{{ product.category.name }}</td>
           <td>{{ product.unit.unit_name }}</td>

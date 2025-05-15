@@ -1,5 +1,5 @@
 <template>
-  <button :class="className" :style="customStyle" @click="handleClick">
+  <button :class="className" :style="customStyle" @click="handleClick" v-bind="$attrs">
     <slot></slot>
   </button>
 </template>
@@ -18,8 +18,8 @@ export default {
     }
   },
   methods: {
-    handleClick() {
-      this.$emit('click')
+    handleClick(e) {
+      this.$emit('click', e)
     }
   }
 }
@@ -31,11 +31,11 @@ button {
   margin: 5px;
   border: none;
   border-radius: 5px;
-  background-color: #007bff;
+  background-color: #fb275e;
   color: white;
   cursor: pointer;
 }
 button:hover {
-  background-color: #0056b3;
+  background-color: #c42a52;
 }
 </style>

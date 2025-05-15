@@ -1,7 +1,7 @@
 <template lang="">
   <div class="product-card" @click="$emit('click', product.id)">
     <div class="product-image-container">
-      <img :src="this.product.thumbnail_url" :alt="this.product.product_name" class="product-image" />
+      <img :src="this.product?.thumbnails?.[0]?.thumbnail_url" :alt="this.product.product_name" class="product-image" />
     </div>
     <h3 class="product-name">{{ this.product.product_name }}</h3>
     <p class="product-price">{{ this.formatCurrency(this.product.price) }}</p>

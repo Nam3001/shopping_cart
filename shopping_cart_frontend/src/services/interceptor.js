@@ -67,7 +67,7 @@ export function handleResponseInterceptor(api) {
   api.interceptors.response.use(res => res, async error => {
     let previousRequest = error.config
 
-    if(error.response.status === 401 && !previousRequest._retry) {
+    if(error?.response?.status === 401 && !previousRequest._retry) {
       previousRequest._retry = true
 
       if(isRefreshing) {

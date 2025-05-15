@@ -96,7 +96,7 @@ class Api::V1::CategoriesController < ApplicationController
       page = params[:page] || 1
       per_page = params[:per_page] || 10
       respondData = Rails.cache.fetch("#{@@detail_category_cache_key}/#{params[:id]}/products/all/page=#{page}/per_page=#{per_page}") do
-        paginated = Product.where(category_id: params[:id]).with_attached_thumbnail.page(page).per(per_page).order(updated_at: :desc)
+        paginated = Product.where(category_id: params[:id]).with_attached_thumbnails.page(page).per(per_page).order(updated_at: :desc)
         {
           products: ActiveModelSerializers::SerializableResource.new(paginated, each_serializer: ProductSerializer).as_json,
           pagination: {

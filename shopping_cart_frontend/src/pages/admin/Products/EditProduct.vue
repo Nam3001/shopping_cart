@@ -29,8 +29,16 @@ export default {
       data.append('category_id', product.categoryId)
       data.append('description', product.description)
 
-      if (product.newThumbnail) {
-        data.append('thumbnail', product.newThumbnail)
+      if(product?.thumbnailsToDelete) {
+        product?.thumbnailsToDelete.forEach(toDelete => {
+          data.append('thumbnails_id_to_delete[]', toDelete)
+        })
+      }
+
+      if(product?.thumbnails) {
+        product.thumbnails.forEach(thumbnail => {
+          data.append('thumbnails[]', thumbnail)
+        });
       }
 
       try {
