@@ -44,25 +44,21 @@ class Api::V1::AttributesController < ApplicationController
   end
 
   def update
-    if @attribute.update(name: params[:name])
-      ActiveRecord::Base.transaction do
-        values = params[:values] || []
-        begin
-          unless params[:values_to_delete].nil?
-            params[:values_to_delete].each do |value_id|
-              @attribute.attribute_values.find_by(id: value_id)&.destroy!
-            end
-          end
-
-          values.each do |value|
+    ActiveRecord::Base.transaction do
+      values = params[:values] || []
+      begin
+        attribute_values_to_delete = @attribute.attribute_values.where(id: params[:values_to_delete]).includes(:product_attribute_values)
+        delete_attribute_value attribute_values_to_delete unless attribute_values_to_delete.empty? || attribute_values_to_delete.nil? 
+        
+        values.each do |value|
           value_id = value[:id]
           value_value = value[:value]
-
+          
           unless value_value.present?
             next
           end
-
-          if !value_id.nil? && !params[:values_to_delete].include?(value_id)
+          
+          if (!value_id.nil? && !params[:values_to_delete]) || (!value_id.nil? && !params[:values_to_delete]&.include?(value_id))
             old_value = @attribute.attribute_values.find_by(id: value_id)
             if old_value
               old_value.update(value: value_value)
@@ -71,16 +67,53 @@ class Api::V1::AttributesController < ApplicationController
             @attribute.attribute_values.create(value: value_value)
           end
         end
-        rescue => e
-          raise ActiveRecord::Rollback, e.message
+
+        if params[:name].present?
+          @attribute.update!(name: params[:name])
         end
       rescue => e
-        render json: { error: e.message }, status: :unprocessable_entity
+        raise ActiveRecord::Rollback, e.message
       end
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+      return
+    end
 
-      render json: @attribute, serializer: ProductAttributeSerializer, status: :ok
-    else
-      render json: { error: @attribute.errors.full_messages }, status: :unprocessable_entity
+    render json: @attribute, serializer: ProductAttributeSerializer, status: :ok
+  end
+
+  def destroy
+    ActiveRecord::Base.transaction do
+      begin
+        attribute = ProductAttribute.includes(attribute_values: :product_attribute_values).find(params[:id])
+        delete_attribute_value attribute.attribute_values
+        
+
+        attribute.destroy!
+        render json: { message: 'Attribute deleted successfully' }, status: :ok
+      rescue => e
+        raise ActiveRecord::Rollback, e.message
+      end
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+  end
+
+  private
+  def delete_attribute_value(attribute_values_to_delete)
+    attribute_values_to_delete.each do |attribute_value|
+      attribute_value.product_attribute_values.each do |product_attribute_value|
+        product_id = product_attribute_value.product_id
+
+        ProductVariant.where(product_id: product_id).each do |product_variant|
+          old_sku = product_variant.sku
+          new_sku = old_sku.split('-').reject { |sku| sku == attribute_value.id.to_s }.join('-')
+          product_variant.update! sku: new_sku
+        end
+
+        product_attribute_value.destroy!
+      end
+      attribute_value.destroy!
     end
   end
 
