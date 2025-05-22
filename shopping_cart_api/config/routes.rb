@@ -21,6 +21,7 @@ Rails.application.routes.draw do
       end
 
       resources :units, except: %i[new edit]
+      resources :attributes, except: %i[new edit]
     end
   end
 
