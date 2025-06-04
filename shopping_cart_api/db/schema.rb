@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_21_011203) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_29_033918) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -39,6 +39,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_21_011203) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "attribute_set_values", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "attribute_set_id", null: false
+    t.bigint "attribute_id", null: false
+    t.bigint "attribute_value_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["attribute_id"], name: "index_attribute_set_values_on_attribute_id"
+    t.index ["attribute_set_id"], name: "index_attribute_set_values_on_attribute_set_id"
+    t.index ["attribute_value_id"], name: "index_attribute_set_values_on_attribute_value_id"
+  end
+
+  create_table "attribute_sets", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_attribute_sets_on_name", unique: true
+  end
+
   create_table "attribute_values", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "value", null: false
     t.bigint "attribute_id", null: false
@@ -46,6 +64,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_21_011203) do
     t.datetime "updated_at", null: false
     t.index ["attribute_id"], name: "index_attribute_values_on_attribute_id"
     t.index ["value", "attribute_id"], name: "index_attribute_values_on_value_and_attribute_id", unique: true
+    t.index ["value"], name: "index_attribute_values_on_value", unique: true
   end
 
   create_table "attributes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -72,6 +91,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_21_011203) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "flat_products", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.integer "quantity", default: 0, null: false
+    t.decimal "price", precision: 15, scale: 2, default: "0.0", null: false
+    t.decimal "old_price", precision: 15, scale: 2, default: "0.0", null: false
+    t.string "sku"
+    t.text "variant_values"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "fk_rails_97ff97ba4f"
+    t.index ["sku"], name: "index_flat_products_on_product_name_and_sku"
+  end
+
   create_table "order_items", primary_key: "[:order_id, :product_id]", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "product_id", null: false
@@ -95,16 +127,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_21_011203) do
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
-  create_table "product_attribute_values", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.bigint "product_id", null: false
-    t.bigint "attribute_value_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "attribute_id"
-    t.index ["attribute_value_id"], name: "index_product_attribute_values_on_attribute_value_id"
-    t.index ["product_id"], name: "index_product_attribute_values_on_product_id"
-  end
-
   create_table "product_variants", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "product_id", null: false
     t.integer "quantity", default: 0, null: false
@@ -125,6 +147,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_21_011203) do
     t.datetime "updated_at", null: false
     t.bigint "category_id", null: false
     t.text "description", null: false
+    t.bigint "attribute_set_id"
+    t.text "product_attributes"
+    t.index ["attribute_set_id"], name: "index_products_on_attribute_set_id"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["unit_id"], name: "index_products_on_unit_id"
     t.check_constraint "`price` >= 0", name: "check_products_price_positive"
@@ -162,15 +187,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_21_011203) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "attribute_set_values", "attribute_sets"
+  add_foreign_key "attribute_set_values", "attribute_values"
+  add_foreign_key "attribute_set_values", "attributes"
   add_foreign_key "attribute_values", "attributes"
   add_foreign_key "cart_items", "products"
   add_foreign_key "cart_items", "users"
+  add_foreign_key "flat_products", "products"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "users"
-  add_foreign_key "product_attribute_values", "attribute_values"
-  add_foreign_key "product_attribute_values", "products"
   add_foreign_key "product_variants", "products"
+  add_foreign_key "products", "attribute_sets"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "units"
 end

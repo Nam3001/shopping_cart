@@ -3,8 +3,26 @@ class Api::V1::AttributesController < ApplicationController
   before_action :set_product_attribute, only: [:show, :update]
 
   def index
-    attributes = ProductAttribute.all
-    render json: attributes, each_serializer: ProductAttributeSerializer, status: :ok
+    is_get_all = params[:page].nil? && params[:per_page].nil?
+    response = {}
+    if is_get_all
+      attributes = ProductAttribute.all
+      response = {
+        attributes: ActiveModelSerializers::SerializableResource.new(attributes, each_serializer: ProductAttributeSerializer).as_json,
+      }
+    else
+      attributes = ProductAttribute.page(params[:page] || 1).per(params[:per_page] || 10)
+      response = {
+        attributes: ActiveModelSerializers::SerializableResource.new(attributes, each_serializer: ProductAttributeSerializer).as_json,
+        pagination: {
+          current_page: attributes.current_page,
+          total_pages: attributes.total_pages,
+          total_count: attributes.total_count
+        }
+      }
+    end
+    
+    render json: response, status: :ok
   end
 
   def show

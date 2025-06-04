@@ -29,7 +29,8 @@
         sidebarItems: [
           { name: 'Products', path: '/admin/products' },
           { name: 'Categories', path: '/admin/categories' },
-          { name: 'Units', path: '/admin/units' }
+          { name: 'Units', path: '/admin/units' },
+          { name: 'Attributes', path: '/admin/attributes' }
         ],
       }
     },

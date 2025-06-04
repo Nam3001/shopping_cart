@@ -12,7 +12,7 @@ module ProductService
         per_page = @params[:per_page]
 
         products = Rails.cache.fetch("#{@@products_cache_key}/page=#{page}/per_page=#{per_page}") do
-          paginatedProduct = Product.includes(:category, :unit, :product_attributes, attribute_values: :product_attribute).with_attached_thumbnails.page(page).per(per_page).order(updated_at: :desc)
+          paginatedProduct = Product.includes(:category, :unit, :flat_products).with_attached_thumbnails.page(page).per(per_page).order(updated_at: :desc)
           {
             products: ActiveModelSerializers::SerializableResource.new(paginatedProduct, each_serializer: ProductSerializer).as_json,
             pagination: {

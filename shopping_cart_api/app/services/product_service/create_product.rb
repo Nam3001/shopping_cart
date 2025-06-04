@@ -8,50 +8,74 @@ module ProductService
       begin
         @product_params = product_params
         product = Product.new(@product_params)
-
         @variant_params = variant_params
-
+        
         ActiveRecord::Base.transaction do
           isCreateSuccess = product.save
-          raise ActiveRecord::Rollback unless isCreateSuccess
-
+          raise ActiveRecord::Rollback, product.errors.full_messages unless isCreateSuccess
+          
           attributes = @variant_params[:attributes]
           product_variants = @variant_params[:product_variants]
 
-          # check if variant exists, if not create new and add to list
-          begin
-            product_attribute_values = product.product_attribute_values
-            attributes.values.each do |v|
-              v[:values].each do |value_id|
-                attribute_value = AttributeValue.where(id: value_id, attribute_id: v[:id])
-                unless attribute_value.empty?
-                  product_attribute_values.create! attribute_value_id: value_id, attribute_id: v[:id]
-                end
-              end
+          product_attributes = []
+          attribute_value_list = []
+          attributes&.values&.each do |attribute|
+            name = attribute[:name]
+            
+            if product_attributes&.include? name
+              next
             end
             
-            product_variants.values.each do |v|
-              sku = ''
-              v[:variant_combinations].each do |vc|
-                unless product_attribute_values.where(attribute_value_id: vc).empty?
-                  if sku == ''
-                  sku += vc.to_s
-                  else
-                    sku += "-#{vc.to_s}"
-                  end
-                end
+            values = attribute[:values]&.uniq
+            
+            attribute_found = ProductAttribute.includes(:attribute_values).find_by(name:)
+            attribute_values = attribute_found.attribute_values.where(value: values)
+            if !attribute_found.nil? && attribute_values.length > 0
+              product_attributes.push(
+                {
+                  id: attribute_found.id,
+                  name: attribute_found.name,
+                  values:
+                }
+                )
+                attribute_value_list.push(*attribute_values)
+            end
+          end
+
+          product.update! product_attributes: product_attributes.to_json
+          
+          product_variants&.values&.each do |product_variant|
+            # values of dupplicate attribute => cannot insert (this hasn't been solved yet)
+            # sku cannot dupplicate
+            sku = "#{product.id}"
+            added_list = []
+            variant_values = []
+            product_variant[:variant_combinations].each do |attribute_value|
+              
+              if added_list.include? attribute_value
+                next
               end
-              ProductVariant.create!(
-                product: product,
-                price: v[:price],
-                quantity: v[:quantity],
-                sku: sku
-              )
+              attribute_values_found = attribute_value_list.select {|value| value.value.upcase == attribute_value&.upcase}
+              attribute_value_found = attribute_values_found.first
+              attribute_found = product_attributes.find { |attribute| attribute[:id] == attribute_value_found&.attribute_id }
+              if attribute_values_found.length > 0
+                sku += "-#{attribute_value_found.id}"
+                added_list.push attribute_value
+                variant_value = {
+                  attribute_id: attribute_found[:id],
+                  name: attribute_found[:name],
+                  value_id: attribute_value_found.id,
+                  value: attribute_value
+                }
+                variant_values.push(variant_value)
+              end
             end
 
-          rescue => e
-            raise ActiveRecord::Rollback, "Error creating variant: #{e.message}"
+            flat_product = FlatProduct.new(product_id: product.id, price: product_variant[:price].to_f, quantity: product_variant[:quantity].to_i, sku:, variant_values: variant_values.to_json)
+            flat_product.save!
+            
           end
+          
         rescue ActiveRecord::Rollback => e
           raise e.message
         end
@@ -69,7 +93,7 @@ module ProductService
     end
 
     def variant_params
-      @params.permit(attributes: [:id, values: []], product_variants: [
+      @params.permit(attributes: [:name, values: []], product_variants: [
         :price, :quantity, {variant_combinations: []},
       ])
     end

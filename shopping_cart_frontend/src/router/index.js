@@ -98,7 +98,38 @@ const routes = [
           requiresAuth: true
         }
       },
-
+      {
+        name: 'admin-attributes',
+        path: 'attributes',
+        component: () => import('@/pages/admin/Attributes/Index.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-attribute-new',
+        path: 'attributes/new',
+        component: () => import('@/pages/admin/Attributes/New.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-attribute-edit',
+        path: 'attributes/:id/edit',
+        component: () => import('@/pages/admin/Attributes/Edit.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        name: 'admin-attribute-detail',
+        path: 'attributes/:id',
+        component: () => import('@/pages/admin/Attributes/Detail.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      }
     ],
     meta: {
       requiresAuth: true
