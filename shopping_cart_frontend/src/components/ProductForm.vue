@@ -116,7 +116,6 @@ export default {
     BaseInput, Button
   },
   mounted() {
-    console.log(this.newThumbnails)
     if (this.type === 'edit')
       this.getProductInfo()
 
@@ -197,7 +196,6 @@ export default {
     },
     handleDeleteChoosenThumbnail(e) {
       this.newThumbnails.splice(e.target.dataset.thumbnailIndex, 1)
-      console.log(this.newThumbnails)
     }
   }
 }

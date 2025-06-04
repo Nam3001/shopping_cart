@@ -7,12 +7,15 @@
           v-model="attribute.name"
           placeholder="Enter attribute name"
           type="text"
-          class-name="input-name" />
+          class-name="input-name"
+          ref="nameInput"
+        />
         </div>
         <div>
-          <div style="display: flex;" v-for="(attributeValueToAdd, index) in attributeValuesToAdd" :key="index">
-            <BaseInput v-model="attributeValuesToAdd[index]" />
-            <Button @click="handleRemoveAttributeValueToAdd(index)">Xóa</Button>
+          <div style="display: flex;" v-for="(attributeValueToAdd, index) in attributeValuesToAdd" :key="index" ref="inputs">
+            <BaseInput v-if="type === 'new'" v-model="attributeValuesToAdd[index]"/>
+            <BaseInput v-else v-model="attributeValuesToAdd[index].value" required/>
+            <Button @click="handleRemoveAttributeValueToAdd(index, attributeValueToAdd)">Xóa</Button>
           </div>
         </div>
         <Button @click="handleAddClickAddValue">Add value</Button>
@@ -22,6 +25,9 @@
   </div>
 </template>
 <script>
+import api from '@/services/api';
+import PATHS from '@/services/paths';
+
 export default {
   props: {
     type: {
@@ -32,31 +38,15 @@ export default {
     onSubmit: {
       type: Function,
       required: true
+    },
+    attributeId: {
+      type: Number,
+      required: false
     }
   },
   components: {
     Button: () => import('@/components/Button.vue'),
     BaseInput: () => import('@/components/BaseInput.vue'),
-  },
-  methods: {
-    handleAddClickAddValue(e) {
-      e.preventDefault();
-      
-      this.attributeValuesToAdd.push('')
-    },
-    // showValues() {
-    //   console.log(this.attributeValuesToAdd);
-    // },
-    handleRemoveAttributeValueToAdd(index) {
-      this.attributeValuesToAdd.splice(index, 1)
-    },
-    handleSubmit() {
-      this.attribute.values = this.attributeValuesToAdd
-      if(this.type === 'edit') {
-        // this.attribute.attribute_values = this.attributeValuesToAdd
-      }
-      this.onSubmit(this.attribute)
-    }
   },
   data() {
     return {
@@ -64,9 +54,58 @@ export default {
         name: '',
         values: []
       },
-      attributeValuesToAdd: []
+      attributeValuesToAdd: [],
+      attributeValuesToDelete: []
     };
   },
+  async mounted() {
+    if(this.type === 'edit' && this.attributeId) {
+      try {
+        let res = await api.get(PATHS.attributeInfo(this.attributeId))
+        let currentAttribute = res.data
+        this.attribute.name = currentAttribute.name
+        this.attributeValuesToAdd = currentAttribute.attribute_values
+      } catch(e) {
+        alert('Không thể load attribute, message: ' + e.response?.data?.error)
+      }
+    }
+  },
+  methods: {
+    handleAddClickAddValue(e) {
+      e.preventDefault();
+      
+      if(this.type === 'edit') {
+        this.attributeValuesToAdd.push({value: ''})
+      } else {
+        this.attributeValuesToAdd.push('')
+      }
+    },
+    handleRemoveAttributeValueToAdd(index, attr) {
+      if(this.type === 'edit') {
+        if(attr.id) {
+          this.attributeValuesToDelete.push(attr.id)
+        }
+      }
+      this.attributeValuesToAdd.splice(index, 1)
+    },
+    handleSubmit() {
+      this.attribute.values = this.attributeValuesToAdd
+      if(this.type === 'edit') {
+        this.attribute.values_to_delete = this.attributeValuesToDelete
+        this.onSubmit(this.attribute, this.attributeId)
+      } else {
+        this.onSubmit(this.attribute)
+      }
+    }
+  },
+  updated() {
+    if(this.attributeValuesToAdd.length <= 0) return
+
+    let inputRef = this.$refs?.inputs?.[this.attributeValuesToAdd.length - 1]?.firstChild
+    if(inputRef) {
+      inputRef.focus()
+    }
+  }
 }
 </script>
 <style scoped>

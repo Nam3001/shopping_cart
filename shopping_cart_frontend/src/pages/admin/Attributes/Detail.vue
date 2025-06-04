@@ -27,8 +27,6 @@ export default {
   },
   async mounted() {
     await this.fetchAttributeDetail();
-
-    console.log(this.attribute.attribute_values);
   },
   methods: {
     async fetchAttributeDetail() {

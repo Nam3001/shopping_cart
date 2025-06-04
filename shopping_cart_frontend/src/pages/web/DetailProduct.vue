@@ -93,8 +93,6 @@ export default {
       this.quantity--;
     },
     addToCart() {
-      // if(this.product.quantity === 0) return
-      console.log('Đã thêm vào giỏ hàng:', this.product, this.quantity, this.selectedOptions);
       alert('Đã thêm sản phẩm vào giỏ hàng!');
     },
 
