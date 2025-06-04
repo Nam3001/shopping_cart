@@ -38,6 +38,18 @@ const PATHS = {
     return `units/${id}`
   },
 
+  attributes: '/attributes',
+  attributeInfo(id) {
+    return `/attributes/${id}`
+  },
+  createAttribute: '/attributes',
+  updateAttribute(id) {
+    return `attributes/${id}`
+  },
+  deleteAttribute(id) {
+    return `attributes/${id}`
+  },
+
   me: '/auth/me',
 }
 

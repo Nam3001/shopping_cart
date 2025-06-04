@@ -11,9 +11,7 @@ class Product < ApplicationRecord
 
 
     has_many :product_variants, dependent: :destroy
-    has_many :product_attribute_values, dependent: :destroy
-    has_many :attribute_values, through: :product_attribute_values
-    has_many :product_attributes, through: :attribute_values, class_name: 'ProductAttribute'
+    has_many :flat_products, dependent: :destroy
 
     validates :product_name, presence: true
     validates :price, presence: true, comparison: { greater_than_or_equal_to: 0 }
@@ -26,48 +24,6 @@ class Product < ApplicationRecord
 
     validate :acceptable_thumbnails
 
-    def get_product_variants
-      ProductVariant.where(product_id: self.id).map do |product_variant|
-        attribute_value_ids = product_variant.sku.split('-').map(&:to_i)
-        attribute_values = AttributeValue.includes(:product_attribute).where(id: attribute_value_ids).map do |attribute_value|
-          {
-            id: attribute_value.id,
-            name: attribute_value.product_attribute.name,
-            value: attribute_value.value
-          }
-        end
-
-        {
-          id: product_variant.id,
-          price: product_variant.price,
-          quantity: product_variant.quantity,
-          sku: product_variant.sku,
-          attribute_values:
-        }
-      end
-    end
-
-    def get_product_attributes
-      product_attribute_value_list = ProductAttributeValue.where(product_id: self.id).includes(:attribute_value)
-        
-      attribute_values = product_attribute_value_list.map do |product_attribute_value|
-        product_attribute_value.attribute_value
-      end
-
-      attribute_and_values = attribute_values.group_by(&:product_attribute)
-      attribute_and_values.map do |product_attribute, values|
-        {
-          id: product_attribute.id,
-          name: product_attribute.name,
-          values: values.map do |value|
-            {
-              id: value.id,
-              value: value.value
-            }
-          end
-        }
-      end
-    end
 
     private
     def acceptable_thumbnails

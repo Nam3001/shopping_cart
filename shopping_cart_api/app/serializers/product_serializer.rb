@@ -1,5 +1,6 @@
+require 'json'
 class ProductSerializer < ActiveModel::Serializer
-  attributes :id, :product_name, :price, :quantity, :created_at, :updated_at, :thumbnails, :description, :product_attributes, :product_variants
+  attributes :id, :product_name, :price, :quantity, :description, :thumbnails, :created_at, :updated_at, :product_attributes, :variants
 
   belongs_to :category
   belongs_to :unit
@@ -20,10 +21,19 @@ class ProductSerializer < ActiveModel::Serializer
   end
 
   def product_attributes
-    object.get_product_attributes
+    JSON.parse object.product_attributes, symbolize_names: true unless object.product_attributes.nil?
   end
 
-  def product_variants
-    object.get_product_variants
+  def variants
+    object.flat_products.map do |flat_product|
+      {
+        id: flat_product.id,
+        quantity: flat_product.quantity,
+        price: flat_product.price.to_f,
+        old_price: flat_product.old_price.to_f,
+        sku: flat_product.sku,
+        variant_values: JSON.parse(flat_product.variant_values)
+      }
+    end
   end
 end

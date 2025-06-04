@@ -25,7 +25,7 @@ class Api::V1::ProductsController < ApplicationController
     result = ProductService::CreateProduct.call(params)
     product = result[:product]
     error = result[:error]
-
+    
     if error.nil?
       render json: product, status: :created
     else
@@ -38,7 +38,7 @@ class Api::V1::ProductsController < ApplicationController
     
     result = ProductService::Update.call(params, @product)
     unless result[:error].nil?
-      render json: { error: result.error }, status: :unprocessable_entity
+      render json: { error: result[:error] }, status: :unprocessable_entity
     else
       render json: @product, status: :ok
     end
@@ -47,7 +47,6 @@ class Api::V1::ProductsController < ApplicationController
   def destroy
     authorize @product
     @product.destroy!
-
     head :no_content
   rescue ActiveRecord::InvalidForeignKey
     render json: { error: "This product can not be deleted, because there are any order or cart has this product" }, status: :unprocessable_entity
@@ -59,12 +58,8 @@ class Api::V1::ProductsController < ApplicationController
 
   private
   def set_product
-    @detail_product_cache_key = "product"
     begin
-      cache_key = "#{@detail_product_cache_key}/#{params[:id]}"
-      @product = Rails.cache.fetch(cache_key) do
-        Product.find(params[:id])
-      end
+      @product = Product.find(params[:id])
     rescue ActiveRecord::RecordNotFound => e
       render json: { error: e.message }, status: :not_found
     rescue => e
