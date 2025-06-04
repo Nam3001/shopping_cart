@@ -52,8 +52,41 @@ export default {
       },
     };
   },
-  mounted() {
-    api.get(PATHS.attributes)
+  async mounted() {
+    try {
+      await this.loadAttributes()
+    } catch(e) {
+      alert(`Không thể load danh sách attribute! ${e.message}`)
+    }
+  },
+  methods: {
+    async handleDeleteAttribute(attrId) {
+      let confirmDelete = confirm("Bạn có chắc chắn xóa attribute này không?")
+      if(!confirmDelete)
+        return
+
+      try {
+        try {
+          await api.delete(PATHS.deleteAttribute(attrId))
+          alert("Xóa attribute thành công!")
+        } catch(e) {
+          let errorMessage = e.response?.data?.error
+          alert("Delete failed: " + errorMessage)
+        }
+        await this.loadAttributes()
+      } catch(e) {
+        let errorMessage = e.response?.data?.error
+        alert(`Không thể load attributes! ${errorMessage}`)
+      }
+    },
+    handleClickDetailAttribute(attrId) {
+      this.$router.push({ name: 'admin-attribute-detail', params: { id: attrId } });
+    },
+    handleClickCreateNewAttribute() {
+      this.$router.push({ name: 'admin-attribute-new' });
+    },
+    async loadAttributes() {
+      api.get(PATHS.attributes)
       .then(response => {
         this.attributes = response.data?.attributes || []
         this.pagination = {
@@ -65,16 +98,6 @@ export default {
       .catch(error => {
         console.error('Error fetching attributes:', error);
       });
-  },
-  methods: {
-    handleDeleteAttribute(attrId) {
-      console.log(attrId);
-    },
-    handleClickDetailAttribute(attrId) {
-      this.$router.push({ name: 'admin-attribute-detail', params: { id: attrId } });
-    },
-    handleClickCreateNewAttribute() {
-      this.$router.push({ name: 'admin-attribute-new' });
     }
   }
 }

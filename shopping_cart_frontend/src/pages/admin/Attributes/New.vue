@@ -1,5 +1,5 @@
 <template lang="">
-  <div>
+  <div style="padding-left: 16px;">
     <h1 class="heading">Create New Attribute</h1>
     <AttributeForm
       :type="'new'"
@@ -18,14 +18,13 @@ export default {
   },
   methods: {
     async onSubmit(attribute) {
-      // this.$router.push({ name: 'admin-attributes' });
-      // console.log('Attribute submitted:', attribute);
       try {
-        let res = await api.post(PATHS.createAttribute, attribute)
-        alert('add new attribute successfully!') 
+        await api.post(PATHS.createAttribute, attribute)
+        alert('add new attribute successfully!')
+        this.$router.push({ name: 'admin-attributes' });
       } catch(e) {
          let errorMessage = e.response?.data?.error
-        alert("Logout failed: " + errorMessage)
+        alert("add new attribute failed: " + errorMessage)
       }
       
     },
